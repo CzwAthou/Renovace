@@ -23,6 +23,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.athou.renovace.IRenovace;
+import com.athou.renovace.IRenovaceCallBack;
 import com.athou.renovace.Renovace;
 import com.athou.renovace.RenovaceHttpProxy;
 import com.athou.renovace.RenovaceLog;
@@ -166,23 +167,26 @@ public class MainActivity extends Activity implements IDialogHandler {
 
     public void OnClickPostResult(View v) {
         Renovace.getInstance().init("http://ip.taobao.com/");
-        Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("ip", "119.75.217.109");
-        Renovace.getInstance().postResult("service/getIpInfo.php", parameters, new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(
-                new HttpCallback<TaobaoApiModel>() {
-                    @Override
-                    public void onSuccess(TaobaoApiModel response) {
-                        showToast(response.toString());
-                    }
+        getTaobaoApiModel("119.75.217.109", new HttpCallback<TaobaoApiModel>() {
+            @Override
+            public void onSuccess(TaobaoApiModel response) {
+                showToast(response.toString());
+            }
 
-                    @Override
-                    public void onFinish(NetErrorBean errorBean) {
-                        super.onFinish(errorBean);
-                        showToast(errorBean);
-                    }
-                }
-        ) {
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
         });
+    }
+
+    private void getTaobaoApiModel(String ip, IRenovaceCallBack<TaobaoApiModel> callBack) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("ip", ip);
+        Renovace.getInstance().postResult("service/getIpInfo.php", parameters,
+                new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(callBack) {
+                });
     }
 
     public void OnClickPostBean(View v) {
