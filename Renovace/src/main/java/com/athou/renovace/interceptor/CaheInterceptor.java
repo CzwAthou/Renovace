@@ -29,6 +29,8 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 
+import static android.util.Log.e;
+
 /**
  * Created by athou on 2016/10/27.
  */
@@ -62,7 +64,7 @@ public class CaheInterceptor implements Interceptor {
         if (Utils.isNetworkAvailable(context)) {
             Response response = chain.proceed(request);
             String cacheControl = request.cacheControl().toString();
-            Log.e("Renovace", maxOnlineStale + "load cahe" + cacheControl);
+            Utils.logE(maxOnlineStale + "load cahe" + cacheControl);
             return response.newBuilder()
                     .removeHeader("Pragma")
                     .removeHeader("Cache-Control")
@@ -75,7 +77,7 @@ public class CaheInterceptor implements Interceptor {
                     Toast.makeText(context, "当前无网络! 为你智能加载缓存", Toast.LENGTH_SHORT).show();
                 }
             });
-            Log.e("Renovace", " no network load cahe");
+            Utils.logE("no network load cahe");
             request = request.newBuilder()
                     .cacheControl(CacheControl.FORCE_CACHE)
                     .build();

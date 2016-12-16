@@ -26,7 +26,6 @@ import okhttp3.HttpUrl;
 /**
  * Created by athou on 2016/10/26.
  */
-
 public class RenovaceCookieManger implements CookieJar{
     private static Context mContext;
     private static RenovaceCookieStore cookieStore;

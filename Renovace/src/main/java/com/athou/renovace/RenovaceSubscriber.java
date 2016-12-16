@@ -19,6 +19,13 @@ package com.athou.renovace;
  * Created by athou on 2016/10/27.
  */
 
+
+import com.athou.renovace.util.Utils;
+
+import java.lang.reflect.Type;
+import java.util.List;
+
+import okhttp3.RequestBody;
 import rx.Subscriber;
 
 /**
@@ -28,38 +35,62 @@ import rx.Subscriber;
  */
 final class RenovaceSubscriber<T> extends Subscriber<T> {
 
-    private IRenovaceCallBack<T> callBack;
+    private RenovaceHttpProxy<T> proxy;
+    private Type type;
 
-    public RenovaceSubscriber(IRenovaceCallBack<T> callBack) {
-        this.callBack = callBack;
+    public RenovaceSubscriber(RenovaceHttpProxy<T> proxy) {
+        this.proxy = proxy;
+        this.type = findNeedType(proxy.getClass());
+    }
+
+    public RenovaceSubscriber(RenovaceHttpProxy<T> proxy, Class cls) {
+        this.proxy = proxy;
+        this.type = Utils.findNeedType(cls);
+    }
+
+    public RenovaceSubscriber(RenovaceHttpProxy proxy, Type type) {
+        this.proxy = proxy;
+        this.type = type;
+    }
+
+    private <R> Type findNeedType(Class<R> cls) {
+        List<Type> typeList = Utils.getMethodTypes(cls);
+        if (typeList == null || typeList.isEmpty()) {
+            return RequestBody.class;
+        }
+        return typeList.get(0);
+    }
+
+    public Type getType() {
+        return type;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (callBack != null) {
-            callBack.onStart();
+        if (proxy != null) {
+            proxy.onStart();
         }
     }
 
     @Override
     public void onCompleted() {
-        if (callBack != null) {
-            callBack.onCompleted();
+        if (proxy != null) {
+            proxy.onCompleted();
         }
     }
 
     @Override
     public void onError(Throwable e) {
-        if (callBack != null) {
-            callBack.onError(e);
+        if (proxy != null) {
+            proxy.onError(e);
         }
     }
 
     @Override
     public void onNext(T responseBody) {
-        if (callBack != null) {
-            callBack.onSuccees(responseBody);
+        if (proxy != null) {
+            proxy.onSuccess(responseBody);
         }
     }
 }

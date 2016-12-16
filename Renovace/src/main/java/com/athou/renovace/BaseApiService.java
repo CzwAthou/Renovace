@@ -19,6 +19,7 @@ import java.util.Map;
 
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
+import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -33,6 +34,8 @@ import retrofit2.http.QueryMap;
 import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 import rx.Observable;
+
+import static android.os.FileObserver.DELETE;
 
 /**
  * Created by athou on 2016/10/26.
@@ -59,13 +62,19 @@ public interface BaseApiService {
     @PUT("{url}")
     Observable<ResponseBody> put(@Path("url") String url, @QueryMap Map<String, String> maps);
 
-    @Multipart
     @POST("{url}")
-    Observable<ResponseBody> uploadFile(@Path("url") String url, @Part("image\"; filename=\"image.jpg") RequestBody requestBody);
+    Observable<ResponseBody> json(@Path("url") String url, @Body RequestBody jsonStr);
 
     @Multipart
     @POST("{url}")
-    Observable<ResponseBody> uploadFiles(@Path("url") String url, @Part("filename") String description, @PartMap() Map<String, RequestBody> maps);
+    Observable<ResponseBody> uploadFile(@Path("url") String url,
+                                        @Part("image\"; filename=\"image.jpg") RequestBody requestBody);
+
+    @Multipart
+    @POST("{url}")
+    Observable<ResponseBody> uploadFiles(@Path("url") String url,
+                                         @Part("filename") String description,
+                                         @PartMap() Map<String, RequestBody> maps);
 
     @Streaming
     @GET

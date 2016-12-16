@@ -18,11 +18,16 @@ package com.athou.renovace.util;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.util.Log;
+
+import com.athou.renovace.Renovace;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.RequestBody;
 
 /**
  * Created by athou on 2016/10/26.
@@ -30,12 +35,46 @@ import java.util.List;
 
 public class Utils {
     public static boolean DEBUG = true;
+    public static String TAG = Renovace.class.getSimpleName();
+
+    public static void logI(String msg) {
+        if (DEBUG && msg != null) {
+            Log.i(TAG, msg);
+        }
+    }
+
+    public static void logD(String msg) {
+        if (DEBUG && msg != null) {
+            Log.i(TAG, msg);
+        }
+    }
+
+    public static void logE(String msg) {
+        if (DEBUG && msg != null) {
+            Log.e(TAG, msg);
+        }
+    }
 
     public static <T> T checkNotNull(T object, String message) {
         if (object == null) {
             throw new NullPointerException(message);
         }
         return object;
+    }
+
+    /**
+     * find the type by interfaces
+     *
+     * @param cls
+     * @param <R>
+     * @return
+     */
+    public static <R> Type findNeedType(Class<R> cls) {
+        List<Type> typeList = Utils.getMethodTypes(cls);
+        if (typeList == null || typeList.isEmpty()) {
+            return RequestBody.class;
+        }
+        return typeList.get(0);
     }
 
     /**
@@ -63,6 +102,7 @@ public class Utils {
 
     /**
      * check NetworkAvailable
+     *
      * @param context
      * @return
      */

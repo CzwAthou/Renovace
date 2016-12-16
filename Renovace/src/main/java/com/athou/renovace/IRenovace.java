@@ -19,9 +19,9 @@ import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
+ * you can implements this interface
  * Created by athou on 2016/10/27.
  */
-
 public interface IRenovace {
     Retrofit getRetrofit();
 

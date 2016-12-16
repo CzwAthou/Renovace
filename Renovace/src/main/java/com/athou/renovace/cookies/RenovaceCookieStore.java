@@ -20,6 +20,8 @@ import android.content.SharedPreferences;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.athou.renovace.util.Utils;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -161,9 +163,9 @@ public class RenovaceCookieStore {
             ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
             cookie = ((SerializableOkHttpCookies) objectInputStream.readObject()).getCookies();
         } catch (IOException e) {
-            Log.d(LOG_TAG, "IOException in decodeCookie", e);
+            Utils.logD("IOException in decodeCookie:" + e.getMessage());
         } catch (ClassNotFoundException e) {
-            Log.d(LOG_TAG, "ClassNotFoundException in decodeCookie", e);
+            Utils.logD("ClassNotFoundException in decodeCookie" + e.getMessage());
         }
 
         return cookie;

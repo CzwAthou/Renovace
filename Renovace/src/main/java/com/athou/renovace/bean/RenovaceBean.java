@@ -17,11 +17,15 @@ package com.athou.renovace.bean;
 
 import com.athou.renovace.constants.RenovaceCode;
 
+import java.io.Serializable;
+
 /**
+ * The parse bean.
+ * You can extends the bean in your app, and Renovace will parse you data
+ * into this bean
  * Created by athou on 2016/10/26.
  */
-
-public class RenovaceBean<T> {
+public class RenovaceBean<T> implements Serializable{
     private int code = 0;
     private String error;
     private T result;

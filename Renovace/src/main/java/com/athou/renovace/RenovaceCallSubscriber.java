@@ -59,7 +59,7 @@ final class RenovaceCallSubscriber<T> extends Subscriber<T> {
     @Override
     public void onNext(T responseBody) {
         if (callBack != null) {
-            callBack.onSuccees(responseBody);
+            callBack.onSuccess(responseBody);
         }
     }
 }

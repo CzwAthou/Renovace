@@ -15,12 +15,9 @@
 
 package com.athou.renovace.demo;
 
-import com.athou.frame.net.exception.CustomException;
+import com.athou.renovace.RenovaceException;
 
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.conn.ConnectTimeoutException;
-import org.apache.http.conn.HttpHostConnectException;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,17 +27,16 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 
+import static com.athou.renovace.demo.HttpCode.ERR_CODE_NONE;
+import static com.athou.renovace.demo.HttpCode.ERR_CODE_UNKOWN;
+
 /**
  * <strong>网络异常信息类 </strong><br>
  *
- * @author 菜菜
- * @category 该类已经将常见异常对应的信息翻译出来<br>
- * 包含了各种异常信息已经对应的code
- * @see AbHttpConstant
- * @since 2015-3-6
+ * @author athou
  */
 public class NetErrorBean {
-    private int err_code = AbHttpConstant.ERR_CODE_NONE;
+    private int err_code = ERR_CODE_NONE;
     private String err_messge = "";
     private Throwable e;
 
@@ -77,13 +73,13 @@ public class NetErrorBean {
      * 清除错误信息
      */
     public void clear() {
-        err_code = AbHttpConstant.ERR_CODE_NONE;
+        err_code = ERR_CODE_NONE;
         err_messge = "";
         e = null;
     }
 
     /**
-     * 获取错误码，默认{@link AbHttpConstant#ERR_CODE_NONE}
+     * 获取错误码，默认{@link HttpCode#ERR_CODE_NONE}
      *
      * @return
      */
@@ -118,7 +114,7 @@ public class NetErrorBean {
      * 设置Throwable
      */
     public NetErrorBean setThrowable(int code, String errMsg) {
-        setThrowable(new CustomException(code, errMsg));
+        setThrowable(new RenovaceException(code, errMsg));
         return this;
     }
 
@@ -129,60 +125,43 @@ public class NetErrorBean {
      */
     private void getErrDetailByThrowable(Throwable e) {
         if (e == null) {
-            err_code = AbHttpConstant.ERR_CODE_UNKOWN;
+            err_code = HttpCode.ERR_CODE_UNKOWN;
             err_messge = "未知错误";
             return;
         }
-        if (e instanceof CustomException) {
-            int code = ((CustomException) e).getCode();
-            err_code = code == AbHttpConstant.ERR_CODE_NONE ? AbHttpConstant.ERR_CODE_UNKOWN : code;
-            err_messge = e.getMessage();
+        if (e instanceof RenovaceException) {
+            int code = ((RenovaceException) e).getCode();
+            //对自定义异常的code进行修正
+            err_code = code == HttpCode.ERR_CODE_NONE ? HttpCode.ERR_CODE_UNKOWN : code;
         } else if (e instanceof FileNotFoundException) { //IOException
-            err_code = AbHttpConstant.ERR_CODE_FILENOTFOUNDEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_FILENOTFOUNDEXCEPTION;
+            err_code = HttpCode.ERR_CODE_FILENOTFOUNDEXCEPTION;
         } else if (e instanceof MalformedURLException) { //IOException
-            err_code = AbHttpConstant.ERR_CODE_MALFORMEDURLEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_MALFORMEDURLEXCEPTION;
+            err_code = HttpCode.ERR_CODE_MALFORMEDURLEXCEPTION;
         } else if (e instanceof UnknownHostException) { //IOException
-            err_code = AbHttpConstant.ERR_CODE_UNKNOWNHOSTEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_UNKNOWNHOSTEXCEPTION;
-        } else if (e instanceof HttpHostConnectException) { //ConnectException
-            err_code = AbHttpConstant.ERR_CODE_HTTPHOSTCONNECTEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_HTTPHOSTCONNECTEXCEPTION;
+            err_code = HttpCode.ERR_CODE_UNKNOWNHOSTEXCEPTION;
         } else if (e instanceof ConnectException) { //SocketException
-            err_code = AbHttpConstant.ERR_CODE_CONNECTEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_CONNECTEXCEPTION;
+            err_code = HttpCode.ERR_CODE_CONNECTEXCEPTION;
         } else if (e instanceof SocketException) { //IOException
-            err_code = AbHttpConstant.ERR_CODE_SOCKETEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_SOCKETEXCEPTION;
+            err_code = HttpCode.ERR_CODE_SOCKETEXCEPTION;
         } else if (e instanceof ConnectTimeoutException) { //InterruptedIOException
-            err_code = AbHttpConstant.ERR_CODE_CONNECTTIMEOUTEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_CONNECTTIMEOUTEXCEPTION;
+            err_code = HttpCode.ERR_CODE_CONNECTTIMEOUTEXCEPTION;
         } else if (e instanceof SocketTimeoutException) { //InterruptedIOException
-            err_code = AbHttpConstant.ERR_CODE_SOCKETTIMEOUTEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_SOCKETTIMEOUTEXCEPTION;
-        } else if (e instanceof HttpResponseException) { //ClientProtocolException
-            err_code = AbHttpConstant.ERR_CODE_HTTPRESPONSEEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_HTTPRESPONSEEXCEPTION;
-        } else if (e instanceof ClientProtocolException) { //IOException
-            err_code = AbHttpConstant.ERR_CODE_CLIENTPROTOCOLEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_CLIENTPROTOCOLEXCEPTION;
+            err_code = HttpCode.ERR_CODE_SOCKETTIMEOUTEXCEPTION;
         } else if (e instanceof IOException) { //
-            err_code = AbHttpConstant.ERR_CODE_IOEXCEPTION;
-            err_messge = AbHttpConstant.ERR_MESSAGE_IOEXCEPTION;
+            err_code = HttpCode.ERR_CODE_IOEXCEPTION;
         } else {
-            err_code = AbHttpConstant.ERR_CODE_UNKOWN;
-            err_messge = e.getMessage();
+            err_code = ERR_CODE_UNKOWN;
         }
+        err_messge = e.getMessage();
     }
 
     /**
-     * 判断网络请求是否成功，若err_code =AbHttpConstant.ERR_CODE_NONE，表示数据请求成功
+     * 判断网络请求是否成功，若err_code =HttpCode.ERR_CODE_NONE，表示数据请求成功
      *
      * @return
      */
     public boolean isSucceed() {
-        if (getErrCode() == AbHttpConstant.ERR_CODE_NONE) {
+        if (getErrCode() == ERR_CODE_NONE) {
             return true;
         }
         return false;

@@ -16,12 +16,20 @@
 package com.athou.renovace.constants;
 
 /**
+ * http request code. you can set value in your app
  * Created by athou on 2016/10/26.
  */
-
 public class RenovaceCode {
+    /**
+     * 请求成功
+     */
     public static int CODE_SUCCESS = 0x000;
+    /**
+     * 解析错误
+     */
     public static int CODE_PARSE_ERR = 0x001;
-
-
+    /**
+     * 请求取消
+     */
+    public static int CODE_REQUEST_CANCEL = 0x002;
 }

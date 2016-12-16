@@ -16,41 +16,36 @@
 package com.athou.renovace.demo;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
 import com.athou.renovace.IRenovace;
 import com.athou.renovace.Renovace;
-import com.athou.renovace.RenovaceCallback;
+import com.athou.renovace.RenovaceHttpProxy;
+import com.athou.renovace.RenovaceLog;
 import com.athou.renovace.demo.bean.BaiduApiBean;
 import com.athou.renovace.demo.bean.BaiduApiModel;
-import com.athou.renovace.demo.bean.GankIOBean;
-import com.athou.renovace.demo.bean.GankIOModel;
 import com.athou.renovace.demo.bean.SouguBean;
 import com.athou.renovace.demo.bean.TaobaoApiBean;
 import com.athou.renovace.demo.bean.TaobaoApiModel;
 import com.athou.renovace.interceptor.HeaderInterceptor;
 import com.athou.renovace.util.Utils;
 
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.ResponseBody;
 import okhttp3.logging.HttpLoggingInterceptor;
-import rx.Subscriber;
 
 /**
  * Created by athou on 2016/10/10.
  */
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements IDialogHandler {
     private String TAG = "Renovace";
 
     @Override
@@ -59,93 +54,16 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
     }
 
-    public void GetNoParamsCallback(View v) {
-        Renovace.getInstance().init("http://gank.io");
-        Renovace.getInstance().get("/api/history/content/2/1", new RenovaceCallback<GankIOBean<List<GankIOModel>>>(this) {
-            @Override
-            public <T> void onSuccees(T bean) {
-                showToast(bean.toString());
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                super.onError(e);
-            }
-        });
-    }
-
-    public void GetNoParamsSubscribe(View v) {
-        Renovace.getInstance().init("http://gank.io");
-        Renovace.getInstance().get("/api/history/content/2/1", new Subscriber<GankIOBean<List<GankIOModel>>>() {
-            @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(GankIOBean<List<GankIOModel>> bean) {
-                showToast(bean.toString());
-            }
-        });
-    }
-
-    public void GetNoParamsNoParseCallback(View v) {
-        Renovace.getInstance().init("http://gank.io");
-        Renovace.getInstance().get("/api/history/content/2/1", new RenovaceCallback<ResponseBody>(this) {
-            @Override
-            public <T> void onSuccees(T bean) {
-                try {
-                    showToast(((ResponseBody) bean).string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                super.onError(e);
-            }
-        });
-    }
-
-    public void GetNoParamsNoParseSubscribe(View v) {
-        Renovace.getInstance().init("http://gank.io");
-        Renovace.getInstance().get("/api/history/content/2/1", new Subscriber<ResponseBody>() {
-            @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(ResponseBody bean) {
-                try {
-                    showToast(bean.string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public void GetParamsParseCallback(View v) {
+    public void OnClickGetResult(View v) {
         Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
+                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
                 logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
 
                 HashMap<String, String> headers = new HashMap<>();
-                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
+//                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
+                headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
 
                 return new OkHttpClient.Builder()
                         .addInterceptor(logInterceptor)
@@ -155,221 +73,158 @@ public class MainActivity extends Activity {
                         .build();//设置超时;
             }
         });
-
         HashMap<String, String> parameters = new HashMap<>();
-        parameters.put("ip", "117.89.35.58");
-        Renovace.getInstance().get("/apistore/iplookupservice/iplookup", parameters, new RenovaceCallback<BaiduApiBean<BaiduApiModel>>(this) {
+        parameters.put("ip", "119.75.217.109");
+        Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
+                new HttpCallback<BaiduApiModel>(this) {
+                    @Override
+                    public void onSuccess(BaiduApiModel response) {
+                        showToast(response.toString());
+                    }
+
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
+                }
+        ) {
+        });
+    }
+
+    public void OnClickGetBean(View v) {
+        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
             @Override
-            public <T> void onSuccees(T response) {
+            public OkHttpClient getHttpClient() {
+                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
+                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
+
+                HashMap<String, String> headers = new HashMap<>();
+//                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
+                headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
+
+                return new OkHttpClient.Builder()
+                        .addInterceptor(logInterceptor)
+                        .addInterceptor(new HeaderInterceptor(headers))
+                        .retryOnConnectionFailure(true)
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .build();//设置超时;
+            }
+        });
+        HashMap<String, String> parameters = new HashMap<>();
+        parameters.put("ip", "119.75.217.109");
+        Renovace.getInstance().getBean("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
+                new HttpCallback<BaiduApiBean<BaiduApiModel>>(this) {
+                    @Override
+                    public void onSuccess(BaiduApiBean<BaiduApiModel> response) {
+                        showToast(response.toString());
+                    }
+
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
+                }
+        ) {
+        });
+    }
+
+    public void OnClickGetDirect(View v) {
+        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+            @Override
+            public OkHttpClient getHttpClient() {
+                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
+                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
+
+                HashMap<String, String> headers = new HashMap<>();
+                headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
+
+                return new OkHttpClient.Builder()
+                        .addInterceptor(logInterceptor)
+                        .addInterceptor(new HeaderInterceptor(headers))
+                        .retryOnConnectionFailure(true)
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .build();//设置超时;
+            }
+        });
+        HashMap<String, String> parameters = new HashMap<>();
+        parameters.put("ip", "119.75.217.109");
+        Renovace.getInstance().getDirect("/apistore/iplookupservice/iplookup", parameters, new HttpCallback<BaiduApiBean<BaiduApiModel>>(this) {
+            @Override
+            public void onSuccess(BaiduApiBean<BaiduApiModel> response) {
                 showToast(response.toString());
             }
 
             @Override
-            public void onError(Throwable e) {
-                super.onError(e);
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
             }
         });
     }
 
-    public void GetParamsParseSubscribe(View v) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
-            @Override
-            public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
-                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
-
-                return new OkHttpClient.Builder()
-                        .addInterceptor(logInterceptor)
-                        .addInterceptor(new HeaderInterceptor(headers))
-                        .retryOnConnectionFailure(true)
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .build();//设置超时;
-            }
-        });
-
-        HashMap<String, String> parameters = new HashMap<>();
-        parameters.put("ip", "117.89.35.58");
-        Renovace.getInstance().get("/apistore/iplookupservice/iplookup", parameters, new Subscriber<BaiduApiBean<BaiduApiModel>>() {
-
-            @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(BaiduApiBean<BaiduApiModel> bean) {
-                showToast(bean.toString());
-            }
-        });
-    }
-
-    public void GetParamsNoParseCallback(View v) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
-            @Override
-            public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
-                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
-
-                return new OkHttpClient.Builder()
-                        .addInterceptor(logInterceptor)
-                        .addInterceptor(new HeaderInterceptor(headers))
-                        .retryOnConnectionFailure(true)
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .build();//设置超时;
-            }
-        });
-
-        HashMap<String, String> parameters = new HashMap<>();
-        parameters.put("ip", "117.89.35.58");
-        Renovace.getInstance().get("/apistore/iplookupservice/iplookup", parameters, new RenovaceCallback<ResponseBody>(this) {
-            @Override
-            public <T> void onSuccees(T bean) {
-                try {
-                    showToast(((ResponseBody) bean).string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                super.onError(e);
-            }
-        });
-    }
-
-    public void GetParamsNoParseSubscribe(View v) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
-            @Override
-            public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
-                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
-
-                return new OkHttpClient.Builder()
-                        .addInterceptor(logInterceptor)
-                        .addInterceptor(new HeaderInterceptor(headers))
-                        .retryOnConnectionFailure(true)
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .build();//设置超时;
-            }
-        });
-
-        HashMap<String, String> parameters = new HashMap<>();
-        parameters.put("ip", "117.89.35.58");
-        Renovace.getInstance().get("/apistore/iplookupservice/iplookup", parameters, new Subscriber<ResponseBody>() {
-            @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(ResponseBody bean) {
-                try {
-                    showToast(((ResponseBody) bean).string());
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    // Post =========================================================================================
-    public void PostParamsParseCallback(View v) {
+    public void OnClickPostResult(View v) {
         Renovace.getInstance().init("http://ip.taobao.com/");
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("ip", "21.22.11.33");
-        Renovace.getInstance().post("service/getIpInfo.php", parameters, new RenovaceCallback<TaobaoApiBean<TaobaoApiModel>>(this) {
-            @Override
-            public <T> void onSuccees(T bean) {
-                showToast(bean.toString());
-            }
-        });
-    }
+        parameters.put("ip", "119.75.217.109");
+        Renovace.getInstance().postResult("service/getIpInfo.php", parameters, new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(
+                new HttpCallback<TaobaoApiModel>() {
+                    @Override
+                    public void onSuccess(TaobaoApiModel response) {
+                        showToast(response.toString());
+                    }
 
-    public void PostParamsParseSubscribe(View v) {
-        Renovace.getInstance().init("http://ip.taobao.com/");
-        Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("ip", "21.22.11.33");
-        Renovace.getInstance().post("service/getIpInfo.php", parameters, new Subscriber<TaobaoApiBean<TaobaoApiModel>>() {
-            @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(TaobaoApiBean<TaobaoApiModel> bean) {
-                showToast(bean.toString());
-            }
-        });
-    }
-
-    public void PostParamsNoParseCallback(View v) {
-        Renovace.getInstance().init("http://ip.taobao.com/");
-        Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("ip", "21.22.11.33");
-        Renovace.getInstance().post("service/getIpInfo.php", parameters, new RenovaceCallback<ResponseBody>(this) {
-            @Override
-            public <T> void onSuccees(T bean) {
-                try {
-                    showToast(((ResponseBody) bean).string());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
                 }
-            }
+        ) {
         });
     }
 
-    public void PostParamsNoParseSubscribe(View v) {
+    public void OnClickPostBean(View v) {
         Renovace.getInstance().init("http://ip.taobao.com/");
         Map<String, String> parameters = new HashMap<String, String>();
-        parameters.put("ip", "21.22.11.33");
-        Renovace.getInstance().post("service/getIpInfo.php", parameters, new Subscriber<ResponseBody>() {
-            @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
-            }
+        parameters.put("ip", "119.75.217.109");
+        Renovace.getInstance().postBean("service/getIpInfo.php", parameters, new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(
+                new HttpCallback<TaobaoApiBean<TaobaoApiModel>>() {
+                    @Override
+                    public void onSuccess(TaobaoApiBean<TaobaoApiModel> response) {
+                        showToast(response.toString());
+                    }
 
-            @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(ResponseBody bean) {
-                try {
-                    showToast(bean.string());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
                 }
+        ) {
+        });
+    }
+
+    public void OnClickPostDirect(View v) {
+        Renovace.getInstance().init("http://ip.taobao.com/");
+        Map<String, String> parameters = new HashMap<String, String>();
+        parameters.put("ip", "119.75.217.109");
+        Renovace.getInstance().postDirect("service/getIpInfo.php", parameters, new HttpCallback<TaobaoApiBean<TaobaoApiModel>>(this) {
+            @Override
+            public void onSuccess(TaobaoApiBean<TaobaoApiModel> response) {
+                showToast(response.toString());
+            }
+
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
             }
         });
     }
 
-    public void OnClick17(View v) {
+    public void OnClickAPI(View v) {
         Renovace.getInstance().init("http://lbs.sougu.net.cn/");
         HashMap<String, String> parameters = new HashMap<>();
         parameters.put("m", "souguapp");
@@ -377,41 +232,45 @@ public class MainActivity extends Activity {
         parameters.put("a", "network");
 
         TestApi testApi = Renovace.getInstance().create(TestApi.class);
-        Renovace.getInstance().call(testApi.getSougu(parameters), new Subscriber<SouguBean>() {
+        Renovace.getInstance().call(testApi.getSougu(parameters), new HttpCallback<SouguBean>(this) {
             @Override
-            public void onCompleted() {
-                Log.i(TAG, "onCompleted");
+            public void onSuccess(SouguBean response) {
+                showToast(response.toString());
             }
 
             @Override
-            public void onError(Throwable e) {
-                Log.i(TAG, "onError");
-            }
-
-            @Override
-            public void onNext(SouguBean bean) {
-                showToast(bean.toString());
-            }
-        });
-    }
-
-    public void OnClick18(View v) {
-        Renovace.getInstance().init("http://lbs.sougu.net.cn/");
-        HashMap<String, String> parameters = new HashMap<>();
-        parameters.put("m", "souguapp");
-        parameters.put("c", "appusers");
-        parameters.put("a", "network");
-
-        TestApi testApi = Renovace.getInstance().create(TestApi.class);
-        Renovace.getInstance().call(testApi.getSougu(parameters), new RenovaceCallback<SouguBean>(this) {
-            @Override
-            public <T> void onSuccees(T bean) {
-                showToast(bean.toString());
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
             }
         });
     }
 
     private void showToast(String msg) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showToast(NetErrorBean errorBean) {
+        if (!errorBean.isSucceed()) {
+            showToast(errorBean.getErrMessge());
+        }
+    }
+
+    private ProgressDialog dialog = null;
+
+    @Override
+    public void showLoadDialog() {
+        if (dialog != null && dialog.isShowing()) {
+            dialog.dismiss();
+            dialog = null;
+        }
+        dialog = ProgressDialog.show(this, "", "正在加载中...", false);
+    }
+
+    @Override
+    public void hideLoadDialog() {
+        if (dialog != null) {
+            dialog.dismiss();
+        }
     }
 }

@@ -16,19 +16,37 @@
 package com.athou.renovace;
 
 /**
+ * IRenovaceCallBack <T> Support your custom data model
  * Created by athou on 2016/10/27.
  */
+public interface IRenovaceCallBack<P> {
 
-/**
- * IRenovaceCallBack <T> Support your custom data model
- */
-public interface IRenovaceCallBack<T> {
-
+    /**
+     * getResult net data start, you can show a dialog in this method
+     */
     void onStart();
 
+    /**
+     * the progress tfor download file
+     * @param curDownSize has downloaded file size
+     * @param totalSize the total file size
+     */
+    void onProgress(long curDownSize, long totalSize);
+
+    /**
+     * getResult net data and parse the data success, you can getResult the data from return the bean
+     */
+    void onSuccess(P response);
+
+    /**
+     * getResult net data and parse the data complete, this method will call after {@link #onSuccess(P)}
+     */
     void onCompleted();
 
+    /**
+     * an error happened when getting net data
+     *
+     * @param e the error
+     */
     void onError(Throwable e);
-
-    <T> void onSuccees(T response);
 }

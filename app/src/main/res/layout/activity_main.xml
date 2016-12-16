@@ -34,99 +34,50 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetNoParamsCallback"
-                android:text="get 不带参 解析 callback"/>
+                android:onClick="OnClickGetResult"
+                android:text="getResult"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetNoParamsSubscribe"
-                android:text="get 不带参 解析 subscribe"/>
+                android:onClick="OnClickGetBean"
+                android:text="getBean"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetNoParamsNoParseCallback"
-                android:text="get 不带参 不解析 callback"/>
+                android:onClick="OnClickGetDirect"
+                android:text="get"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetNoParamsNoParseSubscribe"
-                android:text="get 不带参 不解析 subscribe"/>
+                android:onClick="OnClickPostResult"
+                android:text="postResult"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetParamsParseCallback"
-                android:text="get 带参 解析 callback"/>
+                android:onClick="OnClickPostBean"
+                android:text="postBean"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetParamsParseSubscribe"
-                android:text="get 带参 解析 subscribe"/>
+                android:onClick="OnClickPostDirect"
+                android:text="post"/>
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="GetParamsNoParseCallback"
-                android:text="get 带参 不解析 callback"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="GetParamsNoParseSubscribe"
-                android:text="get 带参 不解析 subscribe"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="PostParamsParseCallback"
-                android:text="Post 带参 解析 callback"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="PostParamsParseSubscribe"
-                android:text="Post 带参 解析 subscribe"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="PostParamsNoParseCallback"
-                android:text="Post 带参 不解析 callback"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="PostParamsNoParseSubscribe"
-                android:text="Post 带参 不解析 subscribe"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="OnClick17"
-                android:text="自定义接口Subscriber"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="OnClick18"
-                android:text="自定义接口Callback"/>
+                android:onClick="OnClickAPI"
+                android:text="自定义APIService"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>

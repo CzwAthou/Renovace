@@ -18,7 +18,6 @@ package com.athou.renovace.download;
 /**
  * Created by athou on 2016/10/27.
  */
-@Deprecated
 public abstract class DownLoadCallBack {
     public void onStart(){}
 
@@ -28,7 +27,7 @@ public abstract class DownLoadCallBack {
 
     abstract public void onError(Throwable e);
 
-    public void onProgress(long fileSizeDownloaded){}
+    public void onProgress(long progress, long totalSize){}
 
     abstract public void onSucess(String path, String name, long fileSize);
 }

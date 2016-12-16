@@ -25,19 +25,21 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 
 import okhttp3.ResponseBody;
-import rx.Subscriber;
+import rx.functions.Func1;
 
 /**
  * Created by athou on 2016/12/15.
  */
 
-abstract class RenovaceFunc<T> {
-    Subscriber subscriber;
+class RenovaceFunc<T> implements Func1<ResponseBody, T> {
+    RenovaceSubscriber subscriber;
+    RenovaceFunc.ParseType parseType;
     Type type;
 
-    public RenovaceFunc(Subscriber subscriber, Type type) {
+    public RenovaceFunc(RenovaceSubscriber subscriber, RenovaceFunc.ParseType parseType) {
         this.subscriber = subscriber;
-        this.type = type;
+        this.parseType = parseType;
+        this.type = subscriber.getType();
     }
 
     protected boolean checkUnSubscriber() {
@@ -47,7 +49,16 @@ abstract class RenovaceFunc<T> {
         return false;
     }
 
-    protected T parse(ResponseBody responseBody, ParseType parseType) {
+    @Override
+    public T call(ResponseBody responseBody) {
+        if (checkUnSubscriber()) {
+            throw new RenovaceException(RenovaceCode.CODE_REQUEST_CANCEL, "请求取消");
+        } else {
+            return parse(responseBody);
+        }
+    }
+
+    protected T parse(ResponseBody responseBody) {
         if (String.class.equals(type)) {
             try {
                 return (T) responseBody.string();
@@ -76,18 +87,18 @@ abstract class RenovaceFunc<T> {
             }
             Utils.logI("解析成功 type：" + type);
             switch (parseType) {
-                case Bean:
-                    return (T) bean;
-                case Direct:
-                    if (!bean.isSuccess()) {
-                        throw new RenovaceException(bean.getCode(), bean.getError());
-                    }
-                    return (T) bean;
                 case Result:
                     if (!bean.isSuccess()) {
                         throw new RenovaceException(bean.getCode(), bean.getError());
                     }
                     return bean.getResult();
+                case Bean:
+                    if (!bean.isSuccess()) {
+                        throw new RenovaceException(bean.getCode(), bean.getError());
+                    }
+                    return (T) bean;
+                case Direct:
+                    return (T) bean;
                 default:
                     throw new RenovaceException(bean.getCode(), bean.getError());
             }
@@ -95,6 +106,32 @@ abstract class RenovaceFunc<T> {
     }
 
     enum ParseType {
-        Bean, Direct, Result
+        /**
+         * 数据结构为：
+         * {
+         * "code":0,
+         * "err":"",
+         * "result":{
+         * "name":"renovace"
+         * }
+         * }
+         */
+        Result,
+        /**
+         * 自定义数据结构为：
+         * {
+         * "code":0,
+         * "name":"renovace"
+         * }
+         */
+        Bean,
+        /**
+         * 完全自定义数据结构为：
+         * {
+         * "xxx":"xxx",
+         * "xxx":"xxx"
+         * }
+         */
+        Direct
     }
 }

@@ -17,14 +17,13 @@ package com.athou.renovace;
 
 import com.athou.renovace.util.Utils;
 
-import java.lang.reflect.Type;
-import java.util.List;
 import java.util.Map;
 
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import rx.Observable;
 import rx.Subscriber;
+import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
@@ -33,8 +32,6 @@ import rx.schedulers.Schedulers;
  * Created by athou on 2016/10/26.
  */
 public class Renovace {
-    private String TAG = Renovace.class.getSimpleName();
-
     private static Renovace unique = null;
 
     public static Renovace getInstance() {
@@ -81,107 +78,192 @@ public class Renovace {
      * 提供用户自定义接口
      *
      * @param service
-     * @param <T>
+     * @param <R>
      * @return
      */
-    public <T> T create(Class<T> service) {
+    public <R> R create(Class<R> service) {
         return iRenovace.getRetrofit().create(service);
     }
 
     /**
      * 自定义接口后，调用此方法进行请求
      */
-    public <T> void call(Observable observable, IRenovaceCallBack<T> callBack) {
-        call(observable, new RenovaceCallSubscriber(callBack));
+    public <R> Subscriber call(Observable observable, IRenovaceCallBack<R> callBack) {
+        return call(observable, new RenovaceCallSubscriber(callBack));
     }
 
     /**
      * 自定义接口后，调用此方法进行请求
      */
-    public <T> void call(Observable observable, Subscriber<T> subscriber) {
+    public <R> Subscriber call(Observable observable, Subscriber<R> subscriber) {
         observable.compose(schedulersTransformer)
                 .subscribe(subscriber);
+        return subscriber;
     }
 
-    private <T> void toSubscribe(Observable observable, Type type, Subscriber<T> subscriber) {
-        if (subscriber instanceof RenovaceSubscriber) {
-            observable.map(new RenovaceResultFunc<T>(type))
-                    .compose(schedulersTransformer)
-                    .subscribe(subscriber);
-        } else {
-            observable.map(new SubscribeResultFunc<T>(type))
-                    .compose(schedulersTransformer)
-                    .subscribe(subscriber);
-        }
+    private <R> Subscriber toSubscribe(Observable observable, RenovaceFunc.ParseType parseType, RenovaceSubscriber<R> subscriber) {
+        observable.map(new RenovaceFunc<R>(subscriber, parseType))
+                .compose(schedulersTransformer)
+                .subscribe(subscriber);
+        return subscriber;
     }
 
     //GET请求=====================================================================
 
     /**
-     * get请求，不带参数
+     * get请求，适用数据结构：
+     * {
+     * "code":0,
+     * "err":"",
+     * "result":{
+     * "name":"renovace"
+     * }
+     * }<br>
+     * 返回数据为result， code以及err已经收集在回调的err里面<br>
+     * 如果你的数据结构里面的关键字不是code,err,result,当然你也可以继承renovacebean后，重写code,err,result
      */
-    public <T> void get(final String url, final IRenovaceCallBack<T> callBack) {
-        toSubscribe(apiManager.get(url), findNeedType(callBack.getClass()), new RenovaceSubscriber<T>(callBack));
+    public <R> Subscriber getResult(String url, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.get(url), RenovaceFunc.ParseType.Result, new RenovaceSubscriber<R>(callBack));
     }
 
     /**
-     * get请求，带参数
+     * get请求,带参数
+     *
+     * @see #getResult(String, RenovaceHttpProxy)
      */
-    public <T> void get(final String url, final Map<String, String> maps, final IRenovaceCallBack<T> callBack) {
-        toSubscribe(apiManager.get(url, maps), findNeedType(callBack.getClass()), new RenovaceSubscriber<T>(callBack));
+    public <R> Subscriber getResult(String url, Map<String, String> maps, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.get(url, maps), RenovaceFunc.ParseType.Result, new RenovaceSubscriber<R>(callBack));
     }
 
     /**
-     * get请求，不带参数
+     * get请求，自定义数据结构
+     * {
+     * "code":0,
+     * "name":"renovace"
+     * }<br>
+     * 返回数据为整个bean，如果code是异常code, code以及err已经收集在回调的err里面<br>
+     * 如果你的数据结构里面的关键字不是code,err,result,当然你也可以继承renovacebean后，重写code,err,result
      */
-    public <T> void get(String url, Subscriber<T> subscriber) {
-        toSubscribe(apiManager.get(url), findNeedType(subscriber.getClass()), subscriber);
+    public <R> Subscriber getBean(String url, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.get(url), RenovaceFunc.ParseType.Bean, new RenovaceSubscriber<R>(callBack));
     }
 
     /**
-     * get请求，带参数
+     * get请求，带参数, 自定义数据结构
+     *
+     * @see #getBean(String, RenovaceHttpProxy)
      */
-    public <T> void get(String url, Map<String, String> maps, Subscriber<T> subscriber) {
-        toSubscribe(apiManager.get(url, maps), findNeedType(subscriber.getClass()), subscriber);
+    public <R> Subscriber getBean(String url, Map<String, String> maps, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.get(url, maps), RenovaceFunc.ParseType.Bean, new RenovaceSubscriber<R>(callBack));
+    }
+
+    /**
+     * get请求，完全自定义数据结构
+     * {
+     * "xxx":"xxx",
+     * "xxx":"xxx"
+     * }<br>
+     * 返回数据为整个bean，数据结构为你自己自定义的数据，但是需要继承renovacebean<br>
+     */
+    public <R> Subscriber getDirect(String url, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.get(url), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
+    }
+
+    /**
+     * get请求，带参数, 完全自定义数据结构
+     * {
+     * "xxx":"xxx",
+     * "xxx":"xxx"
+     * }<br>
+     * 返回数据为整个bean，数据结构为你自己自定义的数据，但是需要继承renovacebean<br>
+     */
+    public <R> Subscriber getDirect(String url, Map<String, String> maps, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.get(url, maps), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
     }
 
     //POST请求=====================================================================
 
     /**
-     * post请求，不带参数
+     * post请求，适用数据结构：
+     * {
+     * "code":0,
+     * "err":"",
+     * "result":{
+     * "name":"renovace"
+     * }
+     * }<br>
+     * 返回数据为result， code以及err已经收集在回调的err里面<br>
+     * 如果你的数据结构里面的关键字不是code,err,result,当然你也可以继承renovacebean后，重写code,err,result
      */
-    public <T> void post(final String url, final IRenovaceCallBack<T> callBack) {
-        toSubscribe(apiManager.post(url), findNeedType(callBack.getClass()), new RenovaceSubscriber<T>(callBack));
+    public <R> Subscriber postResult(String url, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.post(url), RenovaceFunc.ParseType.Result, new RenovaceSubscriber<R>(callBack));
     }
 
     /**
      * post请求，带参数
+     *
+     * @see #postResult(String, RenovaceHttpProxy)
      */
-    public <T> void post(final String url, final Map<String, String> maps, final IRenovaceCallBack<T> callBack) {
-        toSubscribe(apiManager.post(url, maps), findNeedType(callBack.getClass()), new RenovaceSubscriber<T>(callBack));
+    public <R> Subscriber postResult(String url, Map<String, String> maps, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.post(url, maps), RenovaceFunc.ParseType.Result, new RenovaceSubscriber<R>(callBack));
     }
 
     /**
-     * post请求，不带参数
+     * post请求，自定义数据结构
+     * {
+     * "code":0,
+     * "err":""
+     * "name":"renovace"
+     * }<br>
+     * 返回数据为整个bean，如果code是异常code, code以及err已经收集在回调的err里面<br>
+     * 如果你的数据结构里面的关键字不是code,err,result,当然你也可以继承renovacebean后，重写code,err,result
      */
-    public <T> void post(String url, Subscriber<T> subscriber) {
-        toSubscribe(apiManager.post(url), findNeedType(subscriber.getClass()), subscriber);
+    public <R> Subscriber postBean(String url, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.post(url), RenovaceFunc.ParseType.Bean, new RenovaceSubscriber<R>(callBack));
     }
 
     /**
-     * post请求，带参数
+     * post请求，带参数, 自定义数据结构
+     *
+     * @see #postBean(String, RenovaceHttpProxy)
      */
-    public <T> void post(String url, Map<String, String> parameters, Subscriber<T> subscriber) {
-        toSubscribe(apiManager.post(url, parameters), findNeedType(subscriber.getClass()), subscriber);
+    public <R> Subscriber postBean(String url, Map<String, String> parameters, RenovaceHttpProxy<R> callBack) {
+        return toSubscribe(apiManager.post(url, parameters), RenovaceFunc.ParseType.Bean, new RenovaceSubscriber<R>(callBack));
+    }
+
+    /**
+     * post请求，完全自定义数据结构
+     * {
+     * "xxx":"xxx",
+     * "xxx":"xxx"
+     * }<br>
+     * 返回数据为整个bean，数据结构为你自己自定义的数据，但是需要继承renovacebean<br>
+     */
+    public <R> Subscriber postDirect(String url, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.post(url), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
+    }
+
+    /**
+     * post请求，带参数, 自定义数据结构
+     *
+     * @see #postDirect(String, IRenovaceCallBack)
+     */
+    public <R> Subscriber postDirect(String url, Map<String, String> parameters, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.post(url, parameters), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
     }
 
     //DELETE请求=====================================================================
 
     /**
-     * delete请求,带参数，并已经完成解析
+     * delete请求,带参数
      */
-    public <T> void delete(final String url, final Map<String, String> maps, final IRenovaceCallBack<T> callBack) {
-        toSubscribe(apiManager.delete(url, maps), findNeedType(callBack.getClass()), new RenovaceSubscriber(callBack));
+    public <R> Subscriber delete(String url, Map<String, String> maps, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.delete(url, maps), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
     }
 
     //PUT请求=====================================================================
@@ -189,8 +271,9 @@ public class Renovace {
     /**
      * put请求,带参数，并已经完成解析
      */
-    public <T> void put(final String url, Map<String, String> maps, final IRenovaceCallBack<T> callBack) {
-        toSubscribe(apiManager.put(url, maps), findNeedType(callBack.getClass()), new RenovaceSubscriber<T>(callBack));
+    public <R> Subscriber put(String url, Map<String, String> maps, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.put(url, maps), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
     }
 
     //上传文件=====================================================================
@@ -198,15 +281,36 @@ public class Renovace {
     /**
      * upload请求，上传单个文件
      */
-    public <T> void upload(String url, RequestBody requestBody, Subscriber<ResponseBody> subscriber) {
-        toSubscribe(apiManager.uploadFile(url, requestBody), ResponseBody.class, subscriber);
+    public <R> Subscriber upload(String url, RequestBody requestBody, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.uploadFile(url, requestBody), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
     }
 
     /**
      * upload请求，上传多个文件
      */
-    public <T> void upload(String url, String description, Map<String, RequestBody> maps, Subscriber<ResponseBody> subscriber) {
-        toSubscribe(apiManager.uploadFiles(url, description, maps), ResponseBody.class, subscriber);
+    public <R> Subscriber upload(String url, String description, Map<String, RequestBody> maps, IRenovaceCallBack<R> callBack) {
+        return toSubscribe(apiManager.uploadFiles(url, description, maps), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<R>(new RenovaceHttpProxy<R>(callBack) {
+        }, Utils.findNeedType(callBack.getClass())));
+    }
+
+    /**
+     * 下载文件
+     *
+     * @param url
+     * @return
+     */
+    public Subscriber download(String url) {
+        return toSubscribe(apiManager.downloadFile(url), RenovaceFunc.ParseType.Direct, new RenovaceSubscriber<ResponseBody>(null));
+    }
+
+    /**
+     * 由于结合Rxjava 所以取消请求只能通过Subscriber取消订阅，达到取消的目的
+     *
+     * @param subscriber
+     */
+    public void cancel(Subscription subscriber) {
+        Utils.checkNotNull(subscriber, "subscription is null").unsubscribe();
     }
 
     /**
@@ -226,19 +330,4 @@ public class Renovace {
                     .observeOn(AndroidSchedulers.mainThread());
         }
     };
-
-    /**
-     * find the type by interfaces
-     *
-     * @param cls
-     * @param <T>
-     * @return
-     */
-    private <T> Type findNeedType(Class<T> cls) {
-        List<Type> typeList = Utils.getMethodTypes(cls);
-        if (typeList == null || typeList.isEmpty()) {
-            return RequestBody.class;
-        }
-        return typeList.get(0);
-    }
 }

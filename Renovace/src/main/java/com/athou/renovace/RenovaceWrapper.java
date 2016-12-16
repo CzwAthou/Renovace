@@ -72,7 +72,7 @@ final class RenovaceWrapper implements IRenovace {
             if (mHttpClient != null) {
                 return mHttpClient;
             }
-            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor();
+            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
             logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
 
             mHttpClient = new OkHttpClient.Builder()
