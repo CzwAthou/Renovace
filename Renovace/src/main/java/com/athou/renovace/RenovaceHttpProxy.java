@@ -1,7 +1,13 @@
 package com.athou.renovace;
 
 /**
- * Created by athou on 2016/12/16.
+ * this class is used for getting outter parse bean's type.<br>
+ * 1,if you use getResult, RenovaceHttpProxy's dynamic type is your bean that extends {@link com.athou.renovace.bean.RenovaceBean},
+ * and the RenovaceBean<b><<T>T<T>></b>'s <b>T</b> will be return from the Callback that you can implements {@link IRenovaceCallBack}<br>
+ * 2,if you use getBean,  RenovaceHttpProxy's dynamic type is your bean that extends {@link com.athou.renovace.bean.RenovaceBean},
+ * and the RenovaceBean will be return from the Callback that you can implements {@link IRenovaceCallBack}<br>
+ * 3,if you use getDirect, you should use {@link IRenovaceCallBack} to get you bean<br>
+ * Created by athou on 2016/12/16.b
  */
 public abstract class RenovaceHttpProxy<R> {
     private IRenovaceCallBack callBack;

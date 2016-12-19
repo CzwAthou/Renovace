@@ -20,7 +20,6 @@ import com.athou.renovace.util.Utils;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -72,8 +71,8 @@ final class RenovaceWrapper implements IRenovace {
             if (mHttpClient != null) {
                 return mHttpClient;
             }
-            HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
-            logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
+            RenovaceLog logInterceptor = new RenovaceLog();
+            logInterceptor.setLevel(Utils.DEBUG ? RenovaceLog.Level.BODY : RenovaceLog.Level.NONE);
 
             mHttpClient = new OkHttpClient.Builder()
                     .addInterceptor(logInterceptor)
