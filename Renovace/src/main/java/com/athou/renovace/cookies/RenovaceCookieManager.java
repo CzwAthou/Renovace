@@ -26,14 +26,14 @@ import okhttp3.HttpUrl;
 /**
  * Created by athou on 2016/10/26.
  */
-public class RenovaceCookieManger implements CookieJar{
+public class RenovaceCookieManager implements CookieJar{
     private static Context mContext;
     private static RenovaceCookieStore cookieStore;
 
     /**
-     * Mandatory constructor for the RenovaceCookieManger
+     * Mandatory constructor for the RenovaceCookieManager
      */
-    public RenovaceCookieManger(Context context) {
+    public RenovaceCookieManager(Context context) {
         mContext = context;
         if (cookieStore == null) {
             cookieStore = new RenovaceCookieStore(mContext);

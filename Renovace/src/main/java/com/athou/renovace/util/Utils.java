@@ -18,6 +18,7 @@ package com.athou.renovace.util;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Looper;
 import android.util.Log;
 
 import com.athou.renovace.Renovace;
@@ -45,7 +46,7 @@ public class Utils {
 
     public static void logD(String msg) {
         if (DEBUG && msg != null) {
-            Log.i(TAG, msg);
+            Log.d(TAG, msg);
         }
     }
 
@@ -60,6 +61,10 @@ public class Utils {
             throw new NullPointerException(message);
         }
         return object;
+    }
+
+    public static boolean isMain() {
+        return Thread.currentThread() == Looper.getMainLooper().getThread();
     }
 
     /**

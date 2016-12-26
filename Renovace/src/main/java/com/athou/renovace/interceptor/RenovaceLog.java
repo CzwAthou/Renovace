@@ -1,4 +1,4 @@
-package com.athou.renovace;
+package com.athou.renovace.interceptor;
 
 import com.athou.renovace.util.Utils;
 
@@ -87,6 +87,7 @@ public class RenovaceLog implements Interceptor {
     }
 
     public RenovaceLog() {
+        setLevel(Utils.DEBUG ? Level.BODY : Level.NONE);
     }
 
     private volatile RenovaceLog.Level level = RenovaceLog.Level.NONE;

@@ -15,8 +15,14 @@
 
 package com.athou.renovace;
 
+import android.content.Context;
+
+import com.athou.renovace.interceptor.CacheInterceptor;
+import com.athou.renovace.interceptor.RenovaceInterceptor;
+import com.athou.renovace.interceptor.RenovaceLog;
 import com.athou.renovace.util.Utils;
 
+import java.lang.ref.WeakReference;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
@@ -29,13 +35,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
  */
 
 final class RenovaceWrapper implements IRenovace {
+    public static int DEFAULT_TIME_OUT = 5; //超时时间默认5s
     private Retrofit mRetrofit;
 
     private String baseUrl = null;
     private IHttpClient httpClient = null;
 
-    public RenovaceWrapper(String baseUrl) {
-        this(baseUrl, new RenovaceHttpClient());
+    public RenovaceWrapper(Context context, String baseUrl) {
+        this(baseUrl, new RenovaceHttpClient(context));
     }
 
     public RenovaceWrapper(String baseUrl, IHttpClient httpClient) {
@@ -63,19 +70,28 @@ final class RenovaceWrapper implements IRenovace {
     }
 
     static class RenovaceHttpClient implements IRenovace.IHttpClient {
-        public static int DEFAULT_TIME_OUT = 5; //超时时间默认5s
         private OkHttpClient mHttpClient = null;
+        private WeakReference<Context> context;
+
+        public RenovaceHttpClient(Context context) {
+            this.context = new WeakReference<Context>(context.getApplicationContext());
+        }
 
         @Override
         public OkHttpClient getHttpClient() {
             if (mHttpClient != null) {
                 return mHttpClient;
             }
-            RenovaceLog logInterceptor = new RenovaceLog();
-            logInterceptor.setLevel(Utils.DEBUG ? RenovaceLog.Level.BODY : RenovaceLog.Level.NONE);
-
             mHttpClient = new OkHttpClient.Builder()
-                    .addInterceptor(logInterceptor)
+                    //拦截器的顺序必须是先RenovaceInterceptor，然后再是CacheInterceptor等等。。。
+                    //添加日志拦截器
+                    .addInterceptor(new RenovaceLog())
+                    //必须添加RenovaceInterceptor, 否则本框架的许多功能您将无法体验
+                    .addInterceptor(new RenovaceInterceptor())
+                    //添加缓存拦截器
+                    .addInterceptor(new CacheInterceptor(context.get()))
+                    //设置缓存路径
+                    .cache(RenovaceCache.getCache(context.get()))
                     .retryOnConnectionFailure(true)
                     .connectTimeout(DEFAULT_TIME_OUT, TimeUnit.SECONDS)
                     .build();//设置超时

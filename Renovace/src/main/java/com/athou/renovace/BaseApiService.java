@@ -24,6 +24,7 @@ import retrofit2.http.DELETE;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
@@ -35,48 +36,54 @@ import retrofit2.http.Streaming;
 import retrofit2.http.Url;
 import rx.Observable;
 
-import static android.os.FileObserver.DELETE;
-
 /**
  * Created by athou on 2016/10/26.
  */
 
 public interface BaseApiService {
 
-    @POST("{url}")
-    Observable<ResponseBody> post(@Path(value = "url", encoded = true) String url);
+//    @GET("{url}")
+//    Observable<ResponseBody> get(@Header("renovace_header") Map<String, String> header, @Path(value = "url", encoded = true) String url);
+
+    @GET("{url}")
+    Observable<ResponseBody> get(@Header("renovace_header") Map<String, String> header,
+                                 @Path(value = "url", encoded = true) String url, @QueryMap Map<String, String> maps);
+
+//    @POST("{url}")
+//    Observable<ResponseBody> post(@Path(value = "url", encoded = true) String url);
 
     @FormUrlEncoded
     @POST("{url}")
-    Observable<ResponseBody> post(@Path(value = "url", encoded = true) String url, @FieldMap Map<String, String> maps);
-
-    @GET("{url}")
-    Observable<ResponseBody> get(@Path(value = "url", encoded = true) String url);
-
-    @GET("{url}")
-    Observable<ResponseBody> get(@Path(value = "url", encoded = true) String url, @QueryMap Map<String, String> maps);
+    Observable<ResponseBody> post(@Header("renovace_header") Map<String, String> header,
+                                  @Path(value = "url", encoded = true) String url, @FieldMap Map<String, String> maps);
 
     @DELETE("{url}")
-    Observable<ResponseBody> delete(@Path("url") String url, @QueryMap Map<String, String> maps);
+    Observable<ResponseBody> delete(@Header("renovace_header") Map<String, String> header,
+                                    @Path("url") String url, @QueryMap Map<String, String> maps);
 
     @PUT("{url}")
-    Observable<ResponseBody> put(@Path("url") String url, @QueryMap Map<String, String> maps);
+    Observable<ResponseBody> put(@Header("renovace_header") Map<String, String> header,
+                                 @Path("url") String url, @QueryMap Map<String, String> maps);
 
     @POST("{url}")
-    Observable<ResponseBody> json(@Path("url") String url, @Body RequestBody jsonStr);
+    Observable<ResponseBody> json(@Header("renovace_header") Map<String, String> header,
+                                  @Path("url") String url, @Body RequestBody jsonStr);
 
     @Multipart
     @POST("{url}")
-    Observable<ResponseBody> uploadFile(@Path("url") String url,
+    Observable<ResponseBody> uploadFile(@Header("renovace_header") Map<String, String> header,
+                                        @Path("url") String url,
                                         @Part("image\"; filename=\"image.jpg") RequestBody requestBody);
 
     @Multipart
     @POST("{url}")
-    Observable<ResponseBody> uploadFiles(@Path("url") String url,
+    Observable<ResponseBody> uploadFiles(@Header("renovace_header") Map<String, String> header,
+                                         @Path("url") String url,
                                          @Part("filename") String description,
                                          @PartMap() Map<String, RequestBody> maps);
 
     @Streaming
     @GET
-    Observable<ResponseBody> downloadFile(@Url String fileUrl);
+    Observable<ResponseBody> downloadFile(@Header("renovace_header") Map<String, String> header,
+                                          @Url String fileUrl);
 }

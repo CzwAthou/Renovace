@@ -25,22 +25,22 @@ import android.widget.Toast;
 import com.athou.renovace.IRenovace;
 import com.athou.renovace.IRenovaceCallBack;
 import com.athou.renovace.Renovace;
+import com.athou.renovace.RenovaceCache;
 import com.athou.renovace.RenovaceHttpProxy;
-import com.athou.renovace.RenovaceLog;
+import com.athou.renovace.RequestParams;
 import com.athou.renovace.demo.bean.BaiduApiBean;
 import com.athou.renovace.demo.bean.BaiduApiModel;
 import com.athou.renovace.demo.bean.SouguBean;
 import com.athou.renovace.demo.bean.TaobaoApiBean;
 import com.athou.renovace.demo.bean.TaobaoApiModel;
-import com.athou.renovace.interceptor.HeaderInterceptor;
-import com.athou.renovace.util.Utils;
+import com.athou.renovace.interceptor.CacheInterceptor;
+import com.athou.renovace.interceptor.RenovaceInterceptor;
+import com.athou.renovace.interceptor.RenovaceLog;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
-import okhttp3.logging.HttpLoggingInterceptor;
 
 /**
  * Created by athou on 2016/10/10.
@@ -59,23 +59,92 @@ public class MainActivity extends Activity implements IDialogHandler {
         Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
-                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-
-                HashMap<String, String> headers = new HashMap<>();
-//                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
-                headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-
                 return new OkHttpClient.Builder()
-                        .addInterceptor(logInterceptor)
-                        .addInterceptor(new HeaderInterceptor(headers))
+                        //拦截器的顺序必须是先RenovaceInterceptor，然后再是CacheInterceptor等等。。。
+                        //添加日志拦截器
+                        .addInterceptor(new RenovaceLog())
+                        //必须添加RenovaceInterceptor, 否则本框架的许多功能您将无法体验
+                        .addInterceptor(new RenovaceInterceptor())
+                        //添加缓存拦截器
+                        .addInterceptor(new CacheInterceptor(MainActivity.this))
+                        //设置缓存路径
+                        .cache(RenovaceCache.getCache(MainActivity.this))
                         .retryOnConnectionFailure(true)
                         .connectTimeout(5, TimeUnit.SECONDS)
                         .build();//设置超时;
             }
         });
-        HashMap<String, String> parameters = new HashMap<>();
+        RequestParams parameters = new RequestParams();
         parameters.put("ip", "119.75.217.109");
+        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
+        Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
+                new HttpCallback<BaiduApiModel>(this) {
+                    @Override
+                    public void onSuccess(BaiduApiModel response) {
+                        showToast(response.toString());
+                    }
+
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
+                }
+        ) {
+        });
+    }
+
+    public void OnClickGetResultWithCacheFirst(View view) {
+        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+            @Override
+            public OkHttpClient getHttpClient() {
+                return new OkHttpClient.Builder()
+                        .addInterceptor(new RenovaceLog())
+                        .addInterceptor(new RenovaceInterceptor())
+                        .addInterceptor(new CacheInterceptor(MainActivity.this))
+                        .cache(RenovaceCache.getCache(MainActivity.this))
+                        .retryOnConnectionFailure(true)
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .build();//设置超时;
+            }
+        });
+        RequestParams parameters = new RequestParams(RenovaceCache.CacheStrategy.CacheFirst);
+        parameters.put("ip", "119.75.217.109");
+        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
+        Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
+                new HttpCallback<BaiduApiModel>(this) {
+                    @Override
+                    public void onSuccess(BaiduApiModel response) {
+                        showToast(response.toString());
+                    }
+
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
+                }
+        ) {
+        });
+    }
+
+    public void OnClickGetResultWithNetworkFirst(View view) {
+        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+            @Override
+            public OkHttpClient getHttpClient() {
+                return new OkHttpClient.Builder()
+                        .addInterceptor(new RenovaceLog())
+                        .addInterceptor(new RenovaceInterceptor())
+                        .addInterceptor(new CacheInterceptor(MainActivity.this))
+                        .cache(RenovaceCache.getCache(MainActivity.this))
+                        .retryOnConnectionFailure(true)
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .build();//设置超时;
+            }
+        });
+        RequestParams parameters = new RequestParams(RenovaceCache.CacheStrategy.NetWorkFirst);
+        parameters.put("ip", "119.75.217.109");
+        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
         Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
                 new HttpCallback<BaiduApiModel>(this) {
                     @Override
@@ -97,23 +166,17 @@ public class MainActivity extends Activity implements IDialogHandler {
         Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
-                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-
-                HashMap<String, String> headers = new HashMap<>();
-//                headers.put("apikey", "27b6fb21f2b42e9d70cd722b2ed038a9");
-                headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-
                 return new OkHttpClient.Builder()
-                        .addInterceptor(logInterceptor)
-                        .addInterceptor(new HeaderInterceptor(headers))
+                        .addInterceptor(new RenovaceLog())
+                        .addInterceptor(new RenovaceInterceptor())
                         .retryOnConnectionFailure(true)
                         .connectTimeout(5, TimeUnit.SECONDS)
                         .build();//设置超时;
             }
         });
-        HashMap<String, String> parameters = new HashMap<>();
+        RequestParams parameters = new RequestParams();
         parameters.put("ip", "119.75.217.109");
+        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
         Renovace.getInstance().getBean("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
                 new HttpCallback<BaiduApiBean<BaiduApiModel>>(this) {
                     @Override
@@ -135,22 +198,17 @@ public class MainActivity extends Activity implements IDialogHandler {
         Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
-                HttpLoggingInterceptor logInterceptor = new HttpLoggingInterceptor(new RenovaceLog());
-                logInterceptor.setLevel(Utils.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
-
-                HashMap<String, String> headers = new HashMap<>();
-                headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-
                 return new OkHttpClient.Builder()
-                        .addInterceptor(logInterceptor)
-                        .addInterceptor(new HeaderInterceptor(headers))
+                        .addInterceptor(new RenovaceLog())
+                        .addInterceptor(new RenovaceInterceptor())
                         .retryOnConnectionFailure(true)
                         .connectTimeout(5, TimeUnit.SECONDS)
                         .build();//设置超时;
             }
         });
-        HashMap<String, String> parameters = new HashMap<>();
+        RequestParams parameters = new RequestParams();
         parameters.put("ip", "119.75.217.109");
+        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
         Renovace.getInstance().getDirect("/apistore/iplookupservice/iplookup", parameters, new HttpCallback<BaiduApiBean<BaiduApiModel>>(this) {
             @Override
             public void onSuccess(BaiduApiBean<BaiduApiModel> response) {
@@ -166,7 +224,7 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickPostResult(View v) {
-        Renovace.getInstance().init("http://ip.taobao.com/");
+        Renovace.getInstance().init(this, "http://ip.taobao.com/");
         getTaobaoApiModel("119.75.217.109", new HttpCallback<TaobaoApiModel>() {
             @Override
             public void onSuccess(TaobaoApiModel response) {
@@ -182,7 +240,7 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     private void getTaobaoApiModel(String ip, IRenovaceCallBack<TaobaoApiModel> callBack) {
-        Map<String, String> parameters = new HashMap<String, String>();
+        RequestParams parameters = new RequestParams();
         parameters.put("ip", ip);
         Renovace.getInstance().postResult("service/getIpInfo.php", parameters,
                 new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(callBack) {
@@ -190,8 +248,8 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickPostBean(View v) {
-        Renovace.getInstance().init("http://ip.taobao.com/");
-        Map<String, String> parameters = new HashMap<String, String>();
+        Renovace.getInstance().init(this, "http://ip.taobao.com/");
+        RequestParams parameters = new RequestParams();
         parameters.put("ip", "119.75.217.109");
         Renovace.getInstance().postBean("service/getIpInfo.php", parameters, new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(
                 new HttpCallback<TaobaoApiBean<TaobaoApiModel>>() {
@@ -211,8 +269,8 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickPostDirect(View v) {
-        Renovace.getInstance().init("http://ip.taobao.com/");
-        Map<String, String> parameters = new HashMap<String, String>();
+        Renovace.getInstance().init(this, "http://ip.taobao.com/");
+        RequestParams parameters = new RequestParams();
         parameters.put("ip", "119.75.217.109");
         Renovace.getInstance().postDirect("service/getIpInfo.php", parameters, new HttpCallback<TaobaoApiBean<TaobaoApiModel>>(this) {
             @Override
@@ -229,7 +287,7 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickAPI(View v) {
-        Renovace.getInstance().init("http://lbs.sougu.net.cn/");
+        Renovace.getInstance().init(this, "http://lbs.sougu.net.cn/");
         HashMap<String, String> parameters = new HashMap<>();
         parameters.put("m", "souguapp");
         parameters.put("c", "appusers");
