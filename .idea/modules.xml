@@ -2,8 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Renovace.iml" filepath="$PROJECT_DIR$/Renovace.iml" />
-      <module fileurl="file://$PROJECT_DIR$/Renovace/Renovace-Renovace.iml" filepath="$PROJECT_DIR$/Renovace/Renovace-Renovace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Renovace/Renovace.iml" filepath="$PROJECT_DIR$/Renovace/Renovace.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RenovaceMaster.iml" filepath="$PROJECT_DIR$/RenovaceMaster.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>

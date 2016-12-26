@@ -34,7 +34,3 @@ ext {
             "retrofit-gson"        : 'com.squareup.retrofit2:converter-gson:latest.release',
     ]
 }
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
