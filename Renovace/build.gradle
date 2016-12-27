@@ -14,6 +14,7 @@
  */
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.novoda.bintray-release'//添加
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -46,6 +47,16 @@ dependencies {
     //okhttp
     compile rootProject.ext.dependencies["okhttp"]
     compile rootProject.ext.dependencies["okhttplog-interceptor"]
+}
+
+//添加
+publish {
+    userOrg = 'czwathou'//bintray.com用户名
+    groupId = 'com.hyman'//jcenter上的路径
+    artifactId = 'renovace'//项目名称
+    publishVersion = '1.2.2'//版本号
+    desc = 'A http library base on Retrofit and Rxjava '//描述，不重要
+    website = 'https://github.com/hyman/basetools'//网站，不重要；尽量模拟github上的地址，例如我这样的；当然你有地址最好了
 }
 
 task clearJar(type: Delete) {
