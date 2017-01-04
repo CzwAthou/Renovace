@@ -26,6 +26,20 @@ Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神�
 - 结合RxJava，线程智能控制.
 
 ##Usage
+
+gradle引入:
+
+    compile 'com.caiathou:renovace:1.2.4'
+
+maven:
+
+    <dependency>
+      <groupId>com.caiathou</groupId>
+      <artifactId>renovace</artifactId>
+      <version>1.2.4</version>
+      <type>pom</type>
+    </dependency>
+
 ###init()
 初始化1:Renovace内部会创建一个默认的Retrofit和Okhttpclient。
 
