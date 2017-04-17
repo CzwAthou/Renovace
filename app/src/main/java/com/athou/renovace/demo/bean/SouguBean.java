@@ -160,6 +160,15 @@ public class SouguBean {
         public void setIMG_HTTP(String IMG_HTTP) {
             this.IMG_HTTP = IMG_HTTP;
         }
+
+        @Override
+        public String toString() {
+            return "AppTopImgBean{" +
+                    "IMG_URL='" + IMG_URL + '\'' +
+                    ", IMG_NAME='" + IMG_NAME + '\'' +
+                    ", IMG_HTTP='" + IMG_HTTP + '\'' +
+                    '}';
+        }
     }
 
     @Override
@@ -176,7 +185,7 @@ public class SouguBean {
                 ", ad_url='" + ad_url + '\'' +
                 ", theme_url='" + theme_url + '\'' +
                 ", session='" + session + '\'' +
-                ", app_top_img=" + app_top_img +
+                ", app_top_img=" + app_top_img.toString() +
                 '}';
     }
 }

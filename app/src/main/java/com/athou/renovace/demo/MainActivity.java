@@ -23,16 +23,15 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.athou.renovace.IRenovace;
-import com.athou.renovace.IRenovaceCallBack;
 import com.athou.renovace.Renovace;
 import com.athou.renovace.RenovaceCache;
 import com.athou.renovace.RenovaceHttpProxy;
 import com.athou.renovace.RequestParams;
-import com.athou.renovace.demo.bean.BaiduApiBean;
-import com.athou.renovace.demo.bean.BaiduApiModel;
+import com.athou.renovace.demo.bean.PhoneIpApiBean;
 import com.athou.renovace.demo.bean.SouguBean;
 import com.athou.renovace.demo.bean.TaobaoApiBean;
 import com.athou.renovace.demo.bean.TaobaoApiModel;
+import com.athou.renovace.demo.bean.YuminResultBean;
 import com.athou.renovace.interceptor.CacheInterceptor;
 import com.athou.renovace.interceptor.RenovaceInterceptor;
 import com.athou.renovace.interceptor.RenovaceLog;
@@ -47,7 +46,6 @@ import okhttp3.OkHttpClient;
  */
 
 public class MainActivity extends Activity implements IDialogHandler {
-    private String TAG = "Renovace";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,8 +53,9 @@ public class MainActivity extends Activity implements IDialogHandler {
         setContentView(R.layout.activity_main);
     }
 
+
     public void OnClickGetResult(View v) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+        Renovace.getInstance().init("http://apis.juhe.cn", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
                 return new OkHttpClient.Builder()
@@ -75,27 +74,25 @@ public class MainActivity extends Activity implements IDialogHandler {
             }
         });
         RequestParams parameters = new RequestParams();
-        parameters.put("ip", "119.75.217.109");
-        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-        Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
-                new HttpCallback<BaiduApiModel>(this) {
-                    @Override
-                    public void onSuccess(BaiduApiModel response) {
-                        showToast(response.toString());
-                    }
+        parameters.put("phone", "13888888888");
+        parameters.put("dtype", "json");
+        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+            @Override
+            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+                showToast(response.toString());
+            }
 
-                    @Override
-                    public void onFinish(NetErrorBean errorBean) {
-                        super.onFinish(errorBean);
-                        showToast(errorBean);
-                    }
-                }
-        ) {
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
         });
     }
 
     public void OnClickGetResultWithCacheFirst(View view) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+        Renovace.getInstance().init("http://apis.juhe.cn", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
                 return new OkHttpClient.Builder()
@@ -109,27 +106,25 @@ public class MainActivity extends Activity implements IDialogHandler {
             }
         });
         RequestParams parameters = new RequestParams(RenovaceCache.CacheStrategy.CacheFirst);
-        parameters.put("ip", "119.75.217.109");
-        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-        Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
-                new HttpCallback<BaiduApiModel>(this) {
-                    @Override
-                    public void onSuccess(BaiduApiModel response) {
-                        showToast(response.toString());
-                    }
+        parameters.put("phone", "13888888888");
+        parameters.put("dtype", "json");
+        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+            @Override
+            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+                showToast(response.toString());
+            }
 
-                    @Override
-                    public void onFinish(NetErrorBean errorBean) {
-                        super.onFinish(errorBean);
-                        showToast(errorBean);
-                    }
-                }
-        ) {
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
         });
     }
 
     public void OnClickGetResultWithNetworkFirst(View view) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+        Renovace.getInstance().init("http://apis.juhe.cn", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
                 return new OkHttpClient.Builder()
@@ -143,27 +138,25 @@ public class MainActivity extends Activity implements IDialogHandler {
             }
         });
         RequestParams parameters = new RequestParams(RenovaceCache.CacheStrategy.NetWorkFirst);
-        parameters.put("ip", "119.75.217.109");
-        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-        Renovace.getInstance().getResult("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
-                new HttpCallback<BaiduApiModel>(this) {
-                    @Override
-                    public void onSuccess(BaiduApiModel response) {
-                        showToast(response.toString());
-                    }
+        parameters.put("phone", "13888888888");
+        parameters.put("dtype", "json");
+        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+            @Override
+            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+                showToast(response.toString());
+            }
 
-                    @Override
-                    public void onFinish(NetErrorBean errorBean) {
-                        super.onFinish(errorBean);
-                        showToast(errorBean);
-                    }
-                }
-        ) {
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
         });
     }
 
     public void OnClickGetBean(View v) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+        Renovace.getInstance().init("http://www.yumingco.com", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
                 return new OkHttpClient.Builder()
@@ -175,27 +168,24 @@ public class MainActivity extends Activity implements IDialogHandler {
             }
         });
         RequestParams parameters = new RequestParams();
-        parameters.put("ip", "119.75.217.109");
-        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-        Renovace.getInstance().getBean("/apistore/iplookupservice/iplookup", parameters, new RenovaceHttpProxy<BaiduApiBean<BaiduApiModel>>(
-                new HttpCallback<BaiduApiBean<BaiduApiModel>>(this) {
-                    @Override
-                    public void onSuccess(BaiduApiBean<BaiduApiModel> response) {
-                        showToast(response.toString());
-                    }
+        parameters.put("domain", "baidu");
+        parameters.put("suffix", "com");
+        Renovace.getInstance().getBean("/api", parameters, new HttpCallback<YuminResultBean>() {
+            @Override
+            public void onSuccess(YuminResultBean response) {
+                showToast(response.toString());
+            }
 
-                    @Override
-                    public void onFinish(NetErrorBean errorBean) {
-                        super.onFinish(errorBean);
-                        showToast(errorBean);
-                    }
-                }
-        ) {
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
         });
     }
 
     public void OnClickGetDirect(View v) {
-        Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
+        Renovace.getInstance().init("http://www.yumingco.com", new IRenovace.IHttpClient() {
             @Override
             public OkHttpClient getHttpClient() {
                 return new OkHttpClient.Builder()
@@ -207,11 +197,11 @@ public class MainActivity extends Activity implements IDialogHandler {
             }
         });
         RequestParams parameters = new RequestParams();
-        parameters.put("ip", "119.75.217.109");
-        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
-        Renovace.getInstance().getDirect("/apistore/iplookupservice/iplookup", parameters, new HttpCallback<BaiduApiBean<BaiduApiModel>>(this) {
+        parameters.put("domain", "baidu");
+        parameters.put("suffix", "com");
+        Renovace.getInstance().getBean("/api", parameters, new HttpCallback<YuminResultBean>() {
             @Override
-            public void onSuccess(BaiduApiBean<BaiduApiModel> response) {
+            public void onSuccess(YuminResultBean response) {
                 showToast(response.toString());
             }
 
@@ -224,10 +214,35 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickPostResult(View v) {
-        Renovace.getInstance().init(this, "http://ip.taobao.com/");
-        getTaobaoApiModel("119.75.217.109", new HttpCallback<TaobaoApiModel>() {
+//        Renovace.getInstance().init(this, "http://apis.juhe.cn");
+//        RequestParams parameters = new RequestParams();
+//        parameters.put("phone", "13888888888");
+//        parameters.put("dtype", "json");
+//        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+//        Renovace.getInstance().postResult("/mobile/get", parameters, new RenovaceHttpProxy<PhoneIpApiBean<PhoneIpApiBean.PhoneIpBean>, PhoneIpApiBean.PhoneIpBean>(
+//                new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+//                    @Override
+//                    public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+//                        showToast(response.toString());
+//                    }
+//
+//                    @Override
+//                    public void onFinish(NetErrorBean errorBean) {
+//                        super.onFinish(errorBean);
+//                        showToast(errorBean);
+//                    }
+//                }) {
+//        });
+
+
+        Renovace.getInstance().init(this,"http://apis.juhe.cn");
+        RequestParams parameters = new RequestParams();
+        parameters.put("phone", "13888888888");
+        parameters.put("dtype", "json");
+        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+        HttpManager.postPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
             @Override
-            public void onSuccess(TaobaoApiModel response) {
+            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
                 showToast(response.toString());
             }
 
@@ -239,20 +254,11 @@ public class MainActivity extends Activity implements IDialogHandler {
         });
     }
 
-    private void getTaobaoApiModel(String ip, IRenovaceCallBack<TaobaoApiModel> callBack) {
-        RequestParams parameters = new RequestParams();
-        parameters.put("ip", ip);
-        Renovace.getInstance().postResult("service/getIpInfo.php", parameters,
-                new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(callBack) {
-                });
-    }
-
     public void OnClickPostBean(View v) {
         Renovace.getInstance().init(this, "http://ip.taobao.com/");
         RequestParams parameters = new RequestParams();
         parameters.put("ip", "119.75.217.109");
-        Renovace.getInstance().postBean("service/getIpInfo.php", parameters, new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(
-                new HttpCallback<TaobaoApiBean<TaobaoApiModel>>() {
+        Renovace.getInstance().postBean("service/getIpInfo.php", parameters, new HttpCallback<TaobaoApiBean<TaobaoApiModel>>() {
                     @Override
                     public void onSuccess(TaobaoApiBean<TaobaoApiModel> response) {
                         showToast(response.toString());
@@ -264,8 +270,7 @@ public class MainActivity extends Activity implements IDialogHandler {
                         showToast(errorBean);
                     }
                 }
-        ) {
-        });
+        );
     }
 
     public void OnClickPostDirect(View v) {

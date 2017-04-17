@@ -3,6 +3,13 @@
 
 Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神一般的Square公司。网上现在也已经有了许多对这2个框架的介绍了，
 本框架能支持任意数据结构的数据，已经能满足现在的大部分网络请求！
+
+##Update Note：
+version:2.0.0
+
+1，解决了类型的获取，支持所有数据结构的自动解析
+
+2，优化了流程
  
 ##Introduce：
 现在项目需求越来越多，api随之越来越多，本人的项目api数就已达120+，如果都把这些api放入一个ApiService内，加上注释显的格外长，而且不利于查看api。
@@ -11,7 +18,7 @@ Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神�
 于是Renovace应运而生。
 
 ##Advantage
-- 支持任意数据结构的解析
+- 支持任意数据结构的自动解析
 - 加载数据过程中，UI更流畅
 - 加入基础API，减少Api冗余
 - 支持网络缓存
@@ -29,16 +36,16 @@ Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神�
 
 gradle引入:
 
-    compile 'com.caiathou:renovace:1.2.4'
+    compile 'com.github.athou:renovace:2.0.0'
 
 maven:
 
-    <dependency>
-      <groupId>com.caiathou</groupId>
-      <artifactId>renovace</artifactId>
-      <version>1.2.4</version>
-      <type>pom</type>
-    </dependency>
+   	<dependency>
+    	<groupId>com.github.athou</groupId>
+    	<artifactId>renovace</artifactId>
+  		<version>2.0.0</version>
+  		<type>pom</type>
+	</dependency>
 
 ###init()
 初始化1:Renovace内部会创建一个默认的Retrofit和Okhttpclient。
@@ -60,8 +67,9 @@ maven:
                             //设置缓存路径
                             .cache(RenovaceCache.getCache(MainActivity.this))
                             .retryOnConnectionFailure(true)
+							//设置超时;
                             .connectTimeout(5, TimeUnit.SECONDS)
-                            .build();//设置超时;
+                            .build();
                 }
             });
 初始化3:用户自定义retrofit和okhttpclient
@@ -149,23 +157,49 @@ get方式提供了3种实现
 Post也提供了与get一样的3种实现方式,具体使用方法你只需将get替换成post即可！！！
 
 ###注意
-如果你的数据结构适合第一或第二种，你只需要定义一个类实现IRenovaceCallBack即可，
-eg：
+如果你的数据结构适合第一种，你请求可以这样写：
 
-       private void getTaobaoApiModel(String ip, IRenovaceCallBack<TaobaoApiModel> callBack) {
-            RequestParams parameters = new RequestParams();
-            parameters.put("ip", ip);
-            Renovace.getInstance().postResult("service/getIpInfo.php", parameters,
-            new RenovaceHttpProxy<TaobaoApiBean<TaobaoApiModel>>(callBack) {
-            });
-       }
+
+		Renovace.getInstance().init(this, "http://apis.juhe.cn");
+        RequestParams parameters = new RequestParams();
+        parameters.put("phone", "13888888888");
+        parameters.put("dtype", "json");
+        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+        Renovace.getInstance().postResult("/mobile/get", parameters, new RenovaceHttpProxy<PhoneIpApiBean<PhoneIpApiBean.PhoneIpBean>, PhoneIpApiBean.PhoneIpBean>(
+                new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+                    @Override
+                    public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+                        showToast(response.toString());
+                    }
+
+                    @Override
+                    public void onFinish(NetErrorBean errorBean) {
+                        super.onFinish(errorBean);
+                        showToast(errorBean);
+                    }
+                }) {
+        });
+
+
+但是这种写法长度有点长，RenovaceHttpProxy的泛型参数需要填写，其中PhoneIpApiBean是继承RenovaceBean的，PhoneIpApiBean相当于项目的basebean,对于一个实际项目来讲，basebean是固定的，所以我们可以继续封装这个方法，如下（只有getResult/postResult有必要封装，其他请求方法没必要）：
+
+	public static <R> void postPhoneIpResult(String url, RequestParams params, IRenovaceCallBack<R> callback) {
+        Renovace.getInstance().postResult(url, params, new RenovaceHttpProxy<PhoneIpApiBean<R>, R>(callback) {
+        });
+    }
+
+ 这样你只需要定义一个类实现IRenovaceCallBack即可，而且返回的数据就是Basebean包裹的数据，及result字段相对于的bean
 
 然后调用：
 
-        Renovace.getInstance().init("http://ip.taobao.com/");
-        getTaobaoApiModel("119.75.217.109", new HttpCallback<TaobaoApiModel>() {
+       Renovace.getInstance().init(this,"http://apis.juhe.cn");
+        RequestParams parameters = new RequestParams();
+        parameters.put("phone", "13888888888");
+        parameters.put("dtype", "json");
+        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+        HttpManager.postPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
             @Override
-            public void onSuccess(TaobaoApiModel response) {
+            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
                 showToast(response.toString());
             }
 
@@ -175,7 +209,8 @@ eg：
                 showToast(errorBean);
             }
         });
-    }
+
+很明显，这种写法比上面要简单一点！
 
 PS: 例子中Renovace.getInstance().init("xxx")，在你的实际项目中，你只需初始化一次就够了，demo中是为了测试不同的接口才初始化了不同的baseurl
 
@@ -196,8 +231,6 @@ PS: 例子中Renovace.getInstance().init("xxx")，在你的实际项目中，你
 如果你的项目要添加固定的header，比如APPkey之类的，你可以
 在初始化Okhttpclient的时候,你可以添加HeaderInterceptor拦截器，eg:
 
-        HashMap<String, String> headers = new HashMap<>();
-        headers.put("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
 
         //... 初始化okhttpclient的代码
         .addInterceptor(new HeaderInterceptor(headers))
@@ -208,8 +241,8 @@ header,使用方法很简单，跟设置缓存一样，在初始化okhttpclient�
 然后在RequestParams中addHeader(String key,String value)即可，eg:
 
         RequestParams parameters = new RequestParams();
-        parameters.put("ip", "119.75.217.109");
-        parameters.addHeader("apikey", "e084abf9f93a9ec92c35e165b33bb9b3");
+        parameters.put("ip", "0.0.0.0");
+        parameters.addHeader("apikey", "xxxxxxxxxxxx");
 
 ###自定义API
 Renovace提供了用户自定义ApiService的接口，您只需调用call方法即可
@@ -228,12 +261,18 @@ eg:
     parameters.put("a", "network");
 
     TestApi testApi = Renovace.getInstance().create(TestApi.class);
-    Renovace.getInstance().call(testApi.getSougu(parameters), new RenovaceCallback<SouguBean>(this) {
-        @Override
-        public <T> void onSuccees(T bean) {
-            showToast(bean.toString());
-        }
-    });
+    Renovace.getInstance().call(testApi.getSougu(parameters), new HttpCallback<SouguBean>(this) {
+            @Override
+            public void onSuccess(SouguBean response) {
+                showToast(response.toString());
+            }
+
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
+        });
 
 
 [更多内容>>>](http://blog.csdn.net/u013555324/article/details/52973007)

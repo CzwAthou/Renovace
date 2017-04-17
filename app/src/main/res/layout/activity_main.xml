@@ -41,20 +41,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
                 android:gravity="center"
-                android:onClick="OnClickGetResultWithCacheFirst"
-                android:text="getResultWithCacheFirst"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
-                android:onClick="OnClickGetResultWithNetworkFirst"
-                android:text="getResultWithNetworkFirst"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:gravity="center"
                 android:onClick="OnClickGetBean"
                 android:text="getBean"/>
 
@@ -63,7 +49,7 @@
                 android:layout_height="50dp"
                 android:gravity="center"
                 android:onClick="OnClickGetDirect"
-                android:text="get"/>
+                android:text="getDirect"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -84,7 +70,7 @@
                 android:layout_height="50dp"
                 android:gravity="center"
                 android:onClick="OnClickPostDirect"
-                android:text="post"/>
+                android:text="postDirect"/>
 
             <TextView
                 android:layout_width="match_parent"
@@ -92,6 +78,20 @@
                 android:gravity="center"
                 android:onClick="OnClickAPI"
                 android:text="自定义APIService"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:onClick="OnClickGetResultWithCacheFirst"
+                android:text="getResultWithCacheFirst"/>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:onClick="OnClickGetResultWithNetworkFirst"
+                android:text="getResultWithNetworkFirst"/>
         </LinearLayout>
     </ScrollView>
 </LinearLayout>
