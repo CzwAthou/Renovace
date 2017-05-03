@@ -36,14 +36,14 @@ version:2.0.0
 
 gradle引入:
 
-    compile 'com.github.athou:renovace:2.0.0'
+    compile 'com.github.athou:renovace:2.2.1'
 
 maven:
 
    	<dependency>
     	<groupId>com.github.athou</groupId>
     	<artifactId>renovace</artifactId>
-  		<version>2.0.0</version>
+  		<version>2.2.1</version>
   		<type>pom</type>
 	</dependency>
 
