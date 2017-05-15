@@ -6,8 +6,8 @@ import com.athou.renovace.bean.RenovaceBean;
  * Created by athou on 2017/4/17.
  */
 
-public class PhoneIpApiBean<T> extends RenovaceBean<T>{
-//    int resultcode;
+public class PhoneIpApiBean<T> extends RenovaceBean<T> {
+    //    int resultcode;
     String reason;
     int error_code;
 
@@ -31,7 +31,16 @@ public class PhoneIpApiBean<T> extends RenovaceBean<T>{
         reason = error;
     }
 
-    public class PhoneIpBean{
+    @Override
+    public String toString() {
+        return "PhoneIpApiBean{" +
+                "reason='" + reason + '\'' +
+                ", error_code=" + error_code +
+                ", result=" + getResult().toString() +
+                '}';
+    }
+
+    public class PhoneIpResultBean {
 
         /**
          * province : 云南
@@ -99,7 +108,7 @@ public class PhoneIpApiBean<T> extends RenovaceBean<T>{
 
         @Override
         public String toString() {
-            return "PhoneIpBean{" +
+            return "PhoneIpResultBean{" +
                     "province='" + province + '\'' +
                     ", city='" + city + '\'' +
                     ", areacode='" + areacode + '\'' +

@@ -18,7 +18,7 @@ Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神�
 ##Advantage
 - 支持任意数据结构的自动解析
 - 加载数据过程中，UI更流畅
-- 加入基础API，减少Api冗余
+- 加入BaseAPI，减少Api冗余
 - 支持网络缓存
 - 支持固定添加header和动态添加header
 - 支持文件下载和上传
@@ -28,6 +28,7 @@ Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神�
 - 支持自定义Retrofit
 - 支持自定义Okhttpclient
 - 支持自定义的扩展API
+- 支持多个请求合并
 - 结合RxJava，线程智能控制.
 
 ##Usage
@@ -48,28 +49,29 @@ maven:
 ###init()
 初始化1:Renovace内部会创建一个默认的Retrofit和Okhttpclient。
 
-     Renovace.getInstance().init(baseUrl);
+     Renovace.getInstance().init(this, "http://apis.juhe.cn");
+
 初始化2: Renovace内部会创建一个默认的Retrofit，用户可自定义Okhttpclient。
 
-    Renovace.getInstance().init("http://apis.baidu.com", new IRenovace.IHttpClient() {
-                @Override
-                public OkHttpClient getHttpClient() {
-                    return new OkHttpClient.Builder()
-                             //拦截器的顺序必须是先RenovaceInterceptor，然后再是CacheInterceptor等等。。。
-                             //添加日志拦截器
-                            .addInterceptor(new RenovaceLog())
-                            //必须添加RenovaceInterceptor, 否则本框架的许多功能您将无法体验
-                            .addInterceptor(new RenovaceInterceptor())
-                            //添加缓存拦截器
-                            .addInterceptor(new CacheInterceptor(MainActivity.this))
-                            //设置缓存路径
-                            .cache(RenovaceCache.getCache(MainActivity.this))
-                            .retryOnConnectionFailure(true)
-							//设置超时;
-                            .connectTimeout(5, TimeUnit.SECONDS)
-                            .build();
-                }
-            });
+    Renovace.getInstance().init("http://apis.juhe.cn", new IRenovace.IHttpClient() {
+            @Override
+            public OkHttpClient getHttpClient() {
+                return new OkHttpClient.Builder()
+                        //拦截器的顺序必须是先RenovaceInterceptor，然后再是CacheInterceptor等等。。。
+                        //必须添加RenovaceInterceptor, 否则本框架的许多功能您将无法体验
+                        .addInterceptor(new RenovaceInterceptor())
+                        //添加缓存拦截器
+                        .addInterceptor(new CacheInterceptor(MainActivity.this))
+                        //添加日志拦截器
+                        .addInterceptor(new RenovaceLog())
+                        //添加缓存文件
+                        .cache(RenovaceCache.getCache(MainActivity.this))
+                        .retryOnConnectionFailure(true)
+                        .connectTimeout(5, TimeUnit.SECONDS)
+                        .build();//设置超时;
+            }
+        });
+
 初始化3:用户自定义retrofit和okhttpclient
 
     Renovace.getInstance().init(new IRenovace() {
@@ -84,6 +86,7 @@ maven:
                         .build();;
             }
         });
+
 ###BaseBean
 Renovace内部是靠RenovaceBean<T> 进行解析的，如果你的数据结构跟RenovaceBean不同，你可以在你的项目中继承RenovaceBean，然后重写getResult和getCode等方法来实现自己的需求。
 ####eg:
@@ -263,6 +266,52 @@ eg:
             @Override
             public void onSuccess(SouguBean response) {
                 showToast(response.toString());
+            }
+
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
+        });
+
+###请求合并
+Renovace提供了getCall/postCall方法，其返回的是Observalbe，而且包含了数据解析，只不过返回的数整个bean实体，内部也不会做code判断
+
+	public Observable getCall(String url, RequestParams params, Type type) {
+        return apiManager.get(params.getHeader(), url, params.getParams())
+                .map(new RenovaceFunc(new RenovaceFunc.FuncSubscription(type), RenovaceFunc.StructType.Direct));
+    }
+
+使用实例:
+
+		RequestParams parameters1 = new RequestParams();
+        parameters1.put("phone", "13888888888");
+        parameters1.put("dtype", "json");
+        parameters1.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+
+        RequestParams parameters2 = new RequestParams();
+        parameters2.put("phone", "13988888888");
+        parameters2.put("dtype", "json");
+        parameters2.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+
+        Observable<PhoneIpBean> ob1 = Renovace.getInstance().postCall("/mobile/get", parameters1, PhoneIpBean.class);
+        Observable<PhoneIpBean> ob2 = Renovace.getInstance().postCall("/mobile/get", parameters2, PhoneIpBean.class);
+        Observable<List<PhoneIpBean>> zip = Observable.zip(ob1, ob2, new Func2<PhoneIpBean, PhoneIpBean, List<PhoneIpBean>>() {
+            @Override
+            public List<PhoneIpBean> call(PhoneIpBean phoneIpBean, PhoneIpBean phoneIpBean2) {
+                List<PhoneIpBean> array = new ArrayList<>();
+                array.add(phoneIpBean);
+                array.add(phoneIpBean2);
+                return array;
+            }
+        });
+        Renovace.getInstance().call(zip, new HttpCallback<List<PhoneIpBean>>(this) {
+            @Override
+            public void onSuccess(List<PhoneIpBean> response) {
+                if (response != null) {
+                    showToast(response.toString());
+                }
             }
 
             @Override

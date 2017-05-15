@@ -25,9 +25,9 @@ import android.widget.Toast;
 import com.athou.renovace.IRenovace;
 import com.athou.renovace.Renovace;
 import com.athou.renovace.RenovaceCache;
-import com.athou.renovace.RenovaceHttpProxy;
 import com.athou.renovace.RequestParams;
 import com.athou.renovace.demo.bean.PhoneIpApiBean;
+import com.athou.renovace.demo.bean.PhoneIpBean;
 import com.athou.renovace.demo.bean.SouguBean;
 import com.athou.renovace.demo.bean.TaobaoApiBean;
 import com.athou.renovace.demo.bean.TaobaoApiModel;
@@ -35,11 +35,17 @@ import com.athou.renovace.demo.bean.YuminResultBean;
 import com.athou.renovace.interceptor.CacheInterceptor;
 import com.athou.renovace.interceptor.RenovaceInterceptor;
 import com.athou.renovace.interceptor.RenovaceLog;
+import com.athou.renovace.util.TypeUtil;
 
+import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
+import rx.Observable;
+import rx.functions.Func2;
 
 /**
  * Created by athou on 2016/10/10.
@@ -60,12 +66,12 @@ public class MainActivity extends Activity implements IDialogHandler {
             public OkHttpClient getHttpClient() {
                 return new OkHttpClient.Builder()
                         //拦截器的顺序必须是先RenovaceInterceptor，然后再是CacheInterceptor等等。。。
-                        //添加日志拦截器
-                        .addInterceptor(new RenovaceLog())
                         //必须添加RenovaceInterceptor, 否则本框架的许多功能您将无法体验
                         .addInterceptor(new RenovaceInterceptor())
                         //添加缓存拦截器
                         .addInterceptor(new CacheInterceptor(MainActivity.this))
+                        //添加日志拦截器
+                        .addInterceptor(new RenovaceLog())
                         //设置缓存路径
                         .cache(RenovaceCache.getCache(MainActivity.this))
                         .retryOnConnectionFailure(true)
@@ -77,9 +83,9 @@ public class MainActivity extends Activity implements IDialogHandler {
         parameters.put("phone", "13888888888");
         parameters.put("dtype", "json");
         parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
-        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpResultBean>() {
             @Override
-            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+            public void onSuccess(PhoneIpApiBean.PhoneIpResultBean response) {
                 showToast(response.toString());
             }
 
@@ -92,26 +98,14 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickGetResultWithCacheFirst(View view) {
-        Renovace.getInstance().init("http://apis.juhe.cn", new IRenovace.IHttpClient() {
-            @Override
-            public OkHttpClient getHttpClient() {
-                return new OkHttpClient.Builder()
-                        .addInterceptor(new RenovaceLog())
-                        .addInterceptor(new RenovaceInterceptor())
-                        .addInterceptor(new CacheInterceptor(MainActivity.this))
-                        .cache(RenovaceCache.getCache(MainActivity.this))
-                        .retryOnConnectionFailure(true)
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .build();//设置超时;
-            }
-        });
+        Renovace.getInstance().init(this, "http://apis.juhe.cn");
         RequestParams parameters = new RequestParams(RenovaceCache.CacheStrategy.CacheFirst);
         parameters.put("phone", "13888888888");
         parameters.put("dtype", "json");
         parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
-        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpResultBean>() {
             @Override
-            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+            public void onSuccess(PhoneIpApiBean.PhoneIpResultBean response) {
                 showToast(response.toString());
             }
 
@@ -124,26 +118,14 @@ public class MainActivity extends Activity implements IDialogHandler {
     }
 
     public void OnClickGetResultWithNetworkFirst(View view) {
-        Renovace.getInstance().init("http://apis.juhe.cn", new IRenovace.IHttpClient() {
-            @Override
-            public OkHttpClient getHttpClient() {
-                return new OkHttpClient.Builder()
-                        .addInterceptor(new RenovaceLog())
-                        .addInterceptor(new RenovaceInterceptor())
-                        .addInterceptor(new CacheInterceptor(MainActivity.this))
-                        .cache(RenovaceCache.getCache(MainActivity.this))
-                        .retryOnConnectionFailure(true)
-                        .connectTimeout(5, TimeUnit.SECONDS)
-                        .build();//设置超时;
-            }
-        });
+        Renovace.getInstance().init(this, "http://apis.juhe.cn");
         RequestParams parameters = new RequestParams(RenovaceCache.CacheStrategy.NetWorkFirst);
         parameters.put("phone", "13888888888");
         parameters.put("dtype", "json");
         parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
-        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+        HttpManager.getPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpResultBean>() {
             @Override
-            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+            public void onSuccess(PhoneIpApiBean.PhoneIpResultBean response) {
                 showToast(response.toString());
             }
 
@@ -219,10 +201,10 @@ public class MainActivity extends Activity implements IDialogHandler {
 //        parameters.put("phone", "13888888888");
 //        parameters.put("dtype", "json");
 //        parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
-//        Renovace.getInstance().postResult("/mobile/get", parameters, new RenovaceHttpProxy<PhoneIpApiBean<PhoneIpApiBean.PhoneIpBean>, PhoneIpApiBean.PhoneIpBean>(
-//                new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+//        Renovace.getInstance().postResult("/mobile/get", parameters, new RenovaceHttpProxy<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>, PhoneIpApiBean.PhoneIpResultBean>(
+//                new HttpCallback<PhoneIpApiBean.PhoneIpResultBean>() {
 //                    @Override
-//                    public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+//                    public void onSuccess(PhoneIpApiBean.PhoneIpResultBean response) {
 //                        showToast(response.toString());
 //                    }
 //
@@ -235,14 +217,14 @@ public class MainActivity extends Activity implements IDialogHandler {
 //        });
 
 
-        Renovace.getInstance().init(this,"http://apis.juhe.cn");
+        Renovace.getInstance().init(this, "http://apis.juhe.cn");
         RequestParams parameters = new RequestParams();
         parameters.put("phone", "13888888888");
         parameters.put("dtype", "json");
         parameters.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
-        HttpManager.postPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpBean>() {
+        HttpManager.postPhoneIpResult("/mobile/get", parameters, new HttpCallback<PhoneIpApiBean.PhoneIpResultBean>() {
             @Override
-            public void onSuccess(PhoneIpApiBean.PhoneIpBean response) {
+            public void onSuccess(PhoneIpApiBean.PhoneIpResultBean response) {
                 showToast(response.toString());
             }
 
@@ -303,6 +285,87 @@ public class MainActivity extends Activity implements IDialogHandler {
             @Override
             public void onSuccess(SouguBean response) {
                 showToast(response.toString());
+            }
+
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
+        });
+    }
+
+    public void OnClickMutiRequest1(View view) {
+        Renovace.getInstance().init(this, "http://apis.juhe.cn");
+
+        RequestParams parameters1 = new RequestParams();
+        parameters1.put("phone", "13888888888");
+        parameters1.put("dtype", "json");
+        parameters1.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+
+        RequestParams parameters2 = new RequestParams();
+        parameters2.put("phone", "13988888888");
+        parameters2.put("dtype", "json");
+        parameters2.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+
+        Type type = TypeUtil.newParameterizedTypeWithOwner(PhoneIpApiBean.class, PhoneIpApiBean.PhoneIpResultBean.class);
+        Observable ob1 = Renovace.getInstance().postCall("/mobile/get", parameters1, type);
+        Observable ob2 = Renovace.getInstance().postCall("/mobile/get", parameters2, type);
+        Observable<List<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>>> zip = Observable.zip(ob1, ob2, new Func2<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>, PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>, List<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>>>() {
+            @Override
+            public List<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>> call(PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean> phoneIpBeanPhoneIpApiBean, PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean> phoneIpBeanPhoneIpApiBean2) {
+                List<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>> array = new ArrayList<>();
+                array.add(phoneIpBeanPhoneIpApiBean);
+                array.add(phoneIpBeanPhoneIpApiBean2);
+                return array;
+            }
+        });
+        Renovace.getInstance().call(zip, new HttpCallback<List<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>>>(this) {
+            @Override
+            public void onSuccess(List<PhoneIpApiBean<PhoneIpApiBean.PhoneIpResultBean>> response) {
+                if (response != null) {
+                    showToast(response.toString());
+                }
+            }
+
+            @Override
+            public void onFinish(NetErrorBean errorBean) {
+                super.onFinish(errorBean);
+                showToast(errorBean);
+            }
+        });
+    }
+
+    public void OnClickMutiRequest2(View view) {
+        Renovace.getInstance().init(this, "http://apis.juhe.cn");
+
+        RequestParams parameters1 = new RequestParams();
+        parameters1.put("phone", "13888888888");
+        parameters1.put("dtype", "json");
+        parameters1.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+
+        RequestParams parameters2 = new RequestParams();
+        parameters2.put("phone", "13988888888");
+        parameters2.put("dtype", "json");
+        parameters2.put("key", "5682c1f44a7f486e40f9720d6c97ffe4");
+
+        Observable<PhoneIpBean> ob1 = Renovace.getInstance().postCall("/mobile/get", parameters1, PhoneIpBean.class);
+        Observable<PhoneIpBean> ob2 = Renovace.getInstance().postCall("/mobile/get", parameters2, PhoneIpBean.class);
+        Observable<List<PhoneIpBean>> zip = Observable.zip(ob1, ob2, new Func2<PhoneIpBean, PhoneIpBean, List<PhoneIpBean>>() {
+            @Override
+            public List<PhoneIpBean> call(PhoneIpBean phoneIpBean, PhoneIpBean phoneIpBean2) {
+                List<PhoneIpBean> array = new ArrayList<>();
+                array.add(phoneIpBean);
+                array.add(phoneIpBean2);
+                return array;
+            }
+        });
+        Renovace.getInstance().call(zip, new HttpCallback<List<PhoneIpBean>>(this) {
+            @Override
+            public void onSuccess(List<PhoneIpBean> response) {
+                if (response != null) {
+                    showToast(response.toString());
+                }
             }
 
             @Override
