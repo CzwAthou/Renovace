@@ -35,14 +35,14 @@ Retrofit和Rxjava也许是当下异常火爆的2个开源框架，均来自神�
 
 gradle引入:
 
-    compile 'com.github.athou:renovace:2.2.1'
+    compile 'com.github.athou:renovace:2.2.2'
 
 maven:
 
    	<dependency>
     	<groupId>com.github.athou</groupId>
     	<artifactId>renovace</artifactId>
-  		<version>2.2.1</version>
+  		<version>2.2.2</version>
   		<type>pom</type>
 	</dependency>
 
