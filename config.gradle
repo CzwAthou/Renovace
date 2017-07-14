@@ -1,0 +1,21 @@
+ext {
+    compileSdkVersion = 25
+    buildToolsVersion = '25.0.1'
+
+    minSdkVersion = 14
+    targetSdkVersion = 25
+
+    versionCode = 1
+    versionName = "1.0"
+
+    dependencies = [
+            "rxjava"                  : 'io.reactivex:rxjava:1.1.0',  //rx编码
+            "rxandroid"               : 'io.reactivex:rxandroid:1.1.0', //rx编码
+            "okhttp"                  : 'com.squareup.okhttp3:okhttp:latest.release',//网络请求
+            "okhttplog-interceptor"   : 'com.squareup.okhttp3:logging-interceptor:latest.release',//网络请求
+            "retrofit"                : 'com.squareup.retrofit2:retrofit:latest.release',//网络请求
+            "retrofit-adapter"        : 'com.squareup.retrofit2:adapter-rxjava:latest.release',//网络请求
+            "retrofit-gson"           : 'com.squareup.retrofit2:converter-gson:latest.release',//网络请求
+            "retrofit-scalars"        : 'com.squareup.retrofit2:converter-scalars:latest.release'//网络请求
+    ]
+}
