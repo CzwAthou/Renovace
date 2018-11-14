@@ -1,0 +1,47 @@
+apply plugin: 'com.android.library'
+apply plugin: 'com.pince.upaar'
+
+upinfo{
+    groupId = 'com.pince.maven' //选填 默认为此参数
+    artifactId = 'renovace' //必填 组件名称
+    version = '1.0.0'     //必填 组件版本
+    gitRepo = 'origin' //选填
+    packaging = 'aar' //选填 默认aar 可填jar
+}
+
+android {
+    compileSdkVersion depend.compileSdkVersion
+    buildToolsVersion depend.buildToolsVersion
+
+    defaultConfig {
+        minSdkVersion depend.minSdkVersion
+        targetSdkVersion depend.targetSdkVersion
+
+        versionCode 1
+        versionName upinfo.version
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    compileOnly depend.appcompat_v7()
+    compileOnly depend.lifecycle()
+    //RX编码 ===================================================
+    api depend.rxjava2()
+    api depend.rxandroid2()
+
+    implementation depend.retrofit()
+    implementation depend.retrofit_gson()
+    implementation depend.retrofit_rxjava_adapter2()
+
+    api depend.okhttp()
+    implementation depend.okhttp_log()
+
+}
