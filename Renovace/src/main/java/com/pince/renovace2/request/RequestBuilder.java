@@ -14,7 +14,6 @@ import com.pince.renovace2.ResultCallback;
 import com.pince.renovace2.StructType;
 import com.pince.renovace2.Util.TypeUtil;
 import com.pince.renovace2.cache.CacheStrategy;
-import com.pince.renovace2.cache.HttpCache;
 import com.pince.renovace2.config.Config;
 import com.pince.renovace2.header.HeaderKey;
 import com.pince.renovace2.request.adapter.DefaultRequestAdapter;

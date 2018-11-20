@@ -4,7 +4,7 @@ apply plugin: 'com.pince.upaar'
 upinfo{
     groupId = 'com.pince.maven' //选填 默认为此参数
     artifactId = 'lib-renovace' //必填 组件名称
-    version = '1.0.0'     //必填 组件版本
+    version = '1.0.1g'     //必填 组件版本
     gitRepo = 'origin' //选填
     packaging = 'aar' //选填 默认aar 可填jar
 }
@@ -31,8 +31,8 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    compileOnly depend.appcompat_v7()
-    compileOnly depend.lifecycle()
+    api depend.appcompat_v7()
+    api depend.lifecycle()
     //RX编码 ===================================================
     api depend.rxjava2()
     api depend.rxandroid2()
