@@ -12,7 +12,6 @@ import com.pince.renovace2.request.DeleteRequestBuidler;
 import com.pince.renovace2.request.GetRequestBuidler;
 import com.pince.renovace2.request.PostRequestBuilder;
 import com.pince.renovace2.request.PutRequestBuidler;
-import com.pince.renovace2.request.upload.UploadRequest;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -163,16 +162,5 @@ public class Renovace {
             throw new RuntimeException("clientConfig == null");
         }
         return new BodyRequestBuilder(clientConfig);
-    }
-
-    public static UploadRequest uploadFile() {
-        return uploadFile(mDefaultConfig);
-    }
-
-    public static UploadRequest uploadFile(Class<? extends Config> clientConfig) {
-        if (clientConfig == null) {
-            throw new RuntimeException("clientConfig == null");
-        }
-        return new UploadRequest(clientConfig);
     }
 }
