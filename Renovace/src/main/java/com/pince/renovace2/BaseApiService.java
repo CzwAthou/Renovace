@@ -17,11 +17,9 @@ package com.pince.renovace2;
 
 import com.pince.renovace2.header.HeaderKey;
 
-import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
-import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 import okhttp3.ResponseBody;
 import retrofit2.http.Body;
@@ -30,14 +28,10 @@ import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
-import retrofit2.http.Multipart;
 import retrofit2.http.POST;
 import retrofit2.http.PUT;
-import retrofit2.http.Part;
 import retrofit2.http.Path;
 import retrofit2.http.QueryMap;
-import retrofit2.http.Streaming;
-import retrofit2.http.Url;
 
 /**
  * @author athou
@@ -112,45 +106,4 @@ public interface BaseApiService {
                                   @Path(value = "url", encoded = true) String url,
                                   @Body RequestBody body);
 
-    /**
-     * 上传单个文件
-     *
-     * @param header
-     * @param url
-     * @param description
-     * @param file
-     * @return
-     */
-    @Multipart
-    @POST("{url}")
-    Observable<ResponseBody> uploadFile(@Header(HeaderKey.Header) Map<String, Object> header,
-                                        @Path("url") String url,
-                                        @Part("description") RequestBody description,
-                                        @Part MultipartBody.Part file);
-
-    /**
-     * 上传多个文件
-     *
-     * @param header
-     * @param url
-     * @param parts
-     * @return
-     */
-    @Multipart
-    @POST("{url}")
-    Observable<ResponseBody> uploadFiles(@Header(HeaderKey.Header) Map<String, Object> header,
-                                         @Path("url") String url,
-                                         @Part() List<MultipartBody.Part> parts);
-
-    /**
-     * 下载文件
-     *
-     * @param header
-     * @param url
-     * @return
-     */
-    @Streaming
-    @GET
-    Observable<ResponseBody> download(@Header(HeaderKey.Header) Map<String, Object> header,
-                                      @Url String url);
 }

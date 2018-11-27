@@ -11,6 +11,7 @@ import okhttp3.RequestBody;
  * @date 2018/4/16
  */
 public class BodyRequestBuilder extends RequestBuilder<BodyRequestBuilder> {
+
     public BodyRequestBuilder(Class<? extends Config> configCls) {
         super(Method.Body, configCls);
     }

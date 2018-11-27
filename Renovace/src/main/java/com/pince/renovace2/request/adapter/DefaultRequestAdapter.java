@@ -4,7 +4,6 @@ import com.pince.renovace2.BaseApiService;
 import com.pince.renovace2.Renovace;
 import com.pince.renovace2.request.BodyRequestBuilder;
 import com.pince.renovace2.request.RequestBuilder;
-import com.pince.renovace2.request.UploadRequestBuidler;
 
 import io.reactivex.Observable;
 import okhttp3.ResponseBody;
@@ -35,17 +34,6 @@ public class DefaultRequestAdapter implements RequestAdapter {
                 case Body:
                     return Renovace.create(builder.getConfigCls(), BaseApiService.class)
                             .body(builder.getHeaders(), builder.getUrl(), ((BodyRequestBuilder) builder).getBody());
-                case UploadFile:
-                    BaseApiService apiService = Renovace.create(builder.getConfigCls(), BaseApiService.class);
-                    UploadRequestBuidler uploadRequestBuidler = (UploadRequestBuidler) builder;
-                    if (uploadRequestBuidler.isMultiFile()) {
-                        return apiService.uploadFiles(builder.getHeaders(), builder.getUrl(), uploadRequestBuidler.getParts());
-                    } else {
-                        return apiService.uploadFile(builder.getHeaders(), builder.getUrl(), uploadRequestBuidler.getDescription(), uploadRequestBuidler.getPart());
-                    }
-                case Download:
-                    return Renovace.create(builder.getConfigCls(), BaseApiService.class)
-                            .download(builder.getHeaders(), builder.getUrl());
                 default:
                     return Observable.never();
             }

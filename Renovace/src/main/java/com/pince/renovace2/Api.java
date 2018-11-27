@@ -1,11 +1,13 @@
 package com.pince.renovace2;
 
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import com.pince.renovace2.config.Config;
 
 import java.util.HashMap;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
@@ -19,6 +21,15 @@ class Api {
     private static HashMap<String, ApiProxy> apiProxies = new HashMap<>();
 
     private Api() {
+    }
+
+    static @Nullable
+    OkHttpClient getOkhttpClient(Class<? extends Config> clientConfig) {
+        okhttp3.Call.Factory callFactory = provide(clientConfig).retrofit.callFactory();
+        if (callFactory instanceof OkHttpClient) {
+            return (OkHttpClient) callFactory;
+        }
+        return null;
     }
 
     static ApiProxy provide(Class<? extends Config> clientConfig) {

@@ -1,5 +1,6 @@
 package com.pince.renovace2.config;
 
+import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
 
 /**
@@ -8,5 +9,8 @@ import retrofit2.Retrofit;
  */
 
 public interface Config {
+
     void build(Retrofit.Builder builder);
+
+    OkHttpClient client();
 }

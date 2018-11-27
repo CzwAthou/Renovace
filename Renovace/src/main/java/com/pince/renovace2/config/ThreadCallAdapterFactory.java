@@ -42,7 +42,7 @@ class ThreadCallAdapterFactory extends CallAdapter.Factory {
                     RenovaceThread renovaceThread = (RenovaceThread) annotation;
                     subscribeScheduler = renovaceThread.subscribeThread();
                     observerScheduler = renovaceThread.observeThread();
-                    break;
+                    return;
                 }
             }
         }

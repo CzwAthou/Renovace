@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import retrofit2.CallAdapter;
@@ -29,17 +30,7 @@ public abstract class BaseConfig implements Config {
 
     @Override
     public void build(Retrofit.Builder builder) {
-        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
-        okHttpClientBuilder.addInterceptor(new MainInterceptor());
-        okHttpClientBuilder.addNetworkInterceptor(new LogInterceptor());
-        client(okHttpClientBuilder);
-        okHttpClientBuilder.addInterceptor(new CacheInterceptor(Renovace.getContext()));
-        okHttpClientBuilder.cache(HttpCache.getCache(Renovace.getContext().getExternalCacheDir() + "/http-cache"));
-        okHttpClientBuilder.retryOnConnectionFailure(true);
-        okHttpClientBuilder.connectTimeout(5000, TimeUnit.MILLISECONDS);
-        //添加日志拦截器
-        builder.client(okHttpClientBuilder.build());
-
+        builder.client(client());
         if (!TextUtils.isEmpty(getBaseUrl())) {
             builder.baseUrl(getBaseUrl());
         } else if (getBaseHttpUrl() != null) {
@@ -67,6 +58,19 @@ public abstract class BaseConfig implements Config {
                 builder.addConverterFactory(factory);
             }
         }
+    }
+
+    @Override
+    public OkHttpClient client() {
+        OkHttpClient.Builder okHttpClientBuilder = new OkHttpClient.Builder();
+        okHttpClientBuilder.addInterceptor(new MainInterceptor());
+        okHttpClientBuilder.addNetworkInterceptor(new LogInterceptor());
+        client(okHttpClientBuilder);
+        okHttpClientBuilder.addInterceptor(new CacheInterceptor(Renovace.getContext()));
+        okHttpClientBuilder.cache(HttpCache.getCache(Renovace.getContext().getExternalCacheDir() + "/http-cache"));
+        okHttpClientBuilder.retryOnConnectionFailure(true);
+        okHttpClientBuilder.connectTimeout(5000, TimeUnit.MILLISECONDS);
+        return okHttpClientBuilder.build();
     }
 
     /**

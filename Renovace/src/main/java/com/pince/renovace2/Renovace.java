@@ -2,6 +2,7 @@ package com.pince.renovace2;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import com.google.gson.Gson;
 import com.pince.renovace2.Util.RenovaceLogUtil;
@@ -11,12 +12,13 @@ import com.pince.renovace2.request.DeleteRequestBuidler;
 import com.pince.renovace2.request.GetRequestBuidler;
 import com.pince.renovace2.request.PostRequestBuilder;
 import com.pince.renovace2.request.PutRequestBuidler;
-import com.pince.renovace2.request.UploadRequestBuidler;
+import com.pince.renovace2.request.upload.UploadRequest;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import io.reactivex.plugins.RxJavaPlugins;
+import okhttp3.OkHttpClient;
 
 /**
  * @author athou
@@ -51,6 +53,17 @@ public class Renovace {
 
     public static Class<? extends Config> getDefaultConfig() {
         return mDefaultConfig;
+    }
+
+    /**
+     * 获取OkHttpClient
+     *
+     * @param defaultConfig
+     * @return
+     */
+    public static @Nullable
+    OkHttpClient getClient(Class<? extends Config> defaultConfig) {
+        return Api.getOkhttpClient(defaultConfig);
     }
 
     /**
@@ -152,14 +165,14 @@ public class Renovace {
         return new BodyRequestBuilder(clientConfig);
     }
 
-    public static UploadRequestBuidler uploadFile() {
+    public static UploadRequest uploadFile() {
         return uploadFile(mDefaultConfig);
     }
 
-    public static UploadRequestBuidler uploadFile(Class<? extends Config> clientConfig) {
+    public static UploadRequest uploadFile(Class<? extends Config> clientConfig) {
         if (clientConfig == null) {
             throw new RuntimeException("clientConfig == null");
         }
-        return new UploadRequestBuidler(clientConfig);
+        return new UploadRequest(clientConfig);
     }
 }

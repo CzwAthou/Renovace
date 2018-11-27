@@ -12,7 +12,7 @@ import com.pince.renovace2.RenovaceException;
 import com.pince.renovace2.RenovaceFunc;
 import com.pince.renovace2.ResultCallback;
 import com.pince.renovace2.StructType;
-import com.pince.renovace2.Util.TypeUtil;
+import com.pince.renovace2.Util.Utils;
 import com.pince.renovace2.cache.CacheStrategy;
 import com.pince.renovace2.config.Config;
 import com.pince.renovace2.header.HeaderKey;
@@ -216,7 +216,7 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
     }
 
     public <R> Observable<R> request(Class<? extends RenovaceBean> rawCls, Class<R> resultCls) {
-        return requestBody().map(new RenovaceFunc<R>(TypeUtil.newParameterizedTypeWithOwner(rawCls, resultCls), StructType.Result));
+        return requestBody().map(new RenovaceFunc<R>(Utils.newParameterizedTypeWithOwner(rawCls, resultCls), StructType.Result));
     }
 
     public <R> Disposable request(final ResultCallback<R> callback) {
@@ -277,18 +277,6 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
         /**
          * body request
          */
-        Body,
-        /**
-         * upload request
-         */
-        UploadFile,
-//        /**
-//         * upload request
-//         */
-//        UploadFiles,
-        /**
-         * download request
-         */
-        Download
+        Body
     }
 }

@@ -1,6 +1,6 @@
 package com.pince.renovace2;
 
-import com.pince.renovace2.Util.TypeUtil;
+import com.pince.renovace2.Util.Utils;
 
 import java.lang.reflect.Type;
 
@@ -20,6 +20,6 @@ public abstract class ResultCallback<T> {
     }
 
     public Type getType(StructType structType) {
-        return TypeUtil.findNeedType(getClass());
+        return Utils.findNeedType(getClass());
     }
 }

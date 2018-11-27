@@ -1,5 +1,4 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -7,11 +6,27 @@
     android:padding="10dp"
     tools:context="com.testMaven.MainActivity">
 
-    <TextView
+    <Button
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Hello World!"
+        android:layout_height="wrap_content"
+        android:onClick="onClickSync"
+        android:text="同步下载"
         android:textColor="#1c1c1c"
-        android:onClick="onClickMain"
+        android:textSize="18sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickAsync"
+        android:text="异步下载"
+        android:textColor="#1c1c1c"
+        android:textSize="18sp" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="onClickRxjava"
+        android:text="Rxjava下载"
+        android:textColor="#1c1c1c"
         android:textSize="18sp" />
 </LinearLayout>
