@@ -38,6 +38,7 @@ public class DownloadRequest {
     }
 
     public DownloadRequest(String url, String savePath) {
+        this.url = url;
         savePath(savePath);
     }
 

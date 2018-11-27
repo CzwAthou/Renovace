@@ -27,11 +27,17 @@ import okhttp3.Response;
 public class UploadRequest {
 
     private final String url;
-    private final String filePath;
+    private String filePath;
+    private File file;
 
     public UploadRequest(String url, String filePath) {
         this.url = url;
         this.filePath = filePath;
+    }
+
+    public UploadRequest(String url, File file) {
+        this.url = url;
+        this.file = file;
     }
 
     /**
@@ -59,7 +65,9 @@ public class UploadRequest {
 
     @WorkerThread
     public Response uoloadSync(UploadListener uploadListener) throws IOException {
-        File file = new File(filePath);
+        if (file == null) {
+            file = new File(filePath);
+        }
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
         okhttp3.Call call = newClient(uploadListener)
@@ -73,7 +81,9 @@ public class UploadRequest {
     }
 
     public void uoloadAsync(final UploadListener uploadListener) {
-        File file = new File(filePath);
+        if (file == null) {
+            file = new File(filePath);
+        }
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
         okhttp3.Call call = newClient(uploadListener)
