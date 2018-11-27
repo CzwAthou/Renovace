@@ -11,12 +11,10 @@ import com.pince.renovace2.config.BaseConfig;
 import com.pince.renovace2.request.download.DownloadListener;
 import com.pince.renovace2.request.download.DownloadRequest;
 
-import java.io.File;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
 import okhttp3.OkHttpClient;
 
 public class MainActivity extends AppCompatActivity {
@@ -31,7 +29,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void onClickSync(View view) {
-        Log.e("Renovace", "start reqeust");
 //        Renovace.get().url("http://api.diaoyu-3.com/servertime")
 //                .bindLifecycle(this)
 //                .request(String.class)
@@ -85,12 +82,12 @@ public class MainActivity extends AppCompatActivity {
                         .downSync(new DownloadListener() {
                             @Override
                             public void onStart() {
-                                Log.e("download", "down onstart");
+                                Log.e("download", "down onstart thread：" + Thread.currentThread().getName());
                             }
 
                             @Override
                             public void onProgress(long currentLength, long total, boolean done) {
-                                Log.e("download", String.format("hasDown:%d  total:%d", currentLength, total));
+                                Log.e("download", String.format("hasDown:%d  total:%d  done:%s  thread:%s", currentLength, total, String.valueOf(done), Thread.currentThread().getName()));
                             }
 
 //                            @Override
@@ -100,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
                             @Override
                             public void onError(Throwable throwable) {
-                                Log.e("download", "down onError");
+                                Log.e("download", "down error thread：" + Thread.currentThread().getName());
                             }
                         });
             }
@@ -113,12 +110,12 @@ public class MainActivity extends AppCompatActivity {
                 .downloadAsync(new DownloadListener() {
                     @Override
                     public void onStart() {
-                        Log.e("download", "down onstart");
+                        Log.e("download", "down onstart thread：" + Thread.currentThread().getName());
                     }
 
                     @Override
                     public void onProgress(long currentLength, long total, boolean done) {
-                        Log.e("download", String.format("hasDown:%d  total:%d", currentLength, total));
+                        Log.e("download", String.format("hasDown:%d  total:%d  done：%s  thread:%s", currentLength, total, String.valueOf(done), Thread.currentThread().getName()));
                     }
 
 //                    @Override
@@ -128,16 +125,23 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onError(Throwable throwable) {
-                        Log.e("download", "down onError");
+                        Log.e("download", "down error thread：" + Thread.currentThread().getName());
                     }
                 });
     }
 
 
     public void onClickRxjava(View view) {
-        new DownloadRequest("http://dldir1.qq.com/foxmail/qqmail_android_5.5.5.10133788.2392_0.apk")
+//        new DownloadRequest("http://dldir1.qq.com/foxmail/qqmail_android_5.5.5.10133788.2392_0.apk")
+        new DownloadRequest("http://appdl.hicloud.com/dl/appdl/application/apk/74/743b3fbdc77f450f843568eca86aaec4/com.Plus.calculator.1811161101.apk?sign=portal@portal1543225723251&source=portalsite")
                 .savePath(getExternalCacheDir() + "download/test/test.apk")
                 .download()
+                .doOnSubscribe(new Consumer<Disposable>() {
+                    @Override
+                    public void accept(Disposable disposable) throws Exception {
+                        Log.e("download", "down onstart thread：" + Thread.currentThread().getName());
+                    }
+                })
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Consumer<Pair<Long, Long>>() {
                     @Override
@@ -149,12 +153,13 @@ public class MainActivity extends AppCompatActivity {
                 }, new Consumer<Throwable>() {
                     @Override
                     public void accept(Throwable throwable) throws Exception {
+                        Log.e("download", "down error thread：" + Thread.currentThread().getName());
                         throwable.printStackTrace();
                     }
                 }, new Action() {
                     @Override
                     public void run() throws Exception {
-                        Log.e("download", "down complete");
+                        Log.e("download", "down complete thread：" + Thread.currentThread().getName());
                     }
                 });
     }
