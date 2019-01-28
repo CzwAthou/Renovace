@@ -238,16 +238,17 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
                                 if (callback != null) {
                                     if (result != null) {
                                         if (result instanceof RenovaceBean) {
-                                            if (((RenovaceBean) result).isSuccess()) {
+                                            RenovaceBean temp = (RenovaceBean) result;
+                                            if (temp.isSuccess()) {
                                                 callback.onSuccess((R) result);
                                             } else {
-                                                callback.onError(((RenovaceBean) result).getCode(), new RenovaceException(((RenovaceBean) result).getMessage()));
+                                                callback.onError(temp.getCode(), new RenovaceException(temp.getCode(), temp.getMessage()));
                                             }
                                         } else {
                                             callback.onSuccess((R) result);
                                         }
                                     } else {
-                                        callback.onError(RenovaceCode.CODE_PARSE_ERR, new RenovaceException("parse error"));
+                                        callback.onError(RenovaceCode.CODE_PARSE_ERR, new RenovaceException(RenovaceCode.CODE_PARSE_ERR, "parse error"));
                                     }
                                 }
                             }
@@ -255,7 +256,7 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
                             @Override
                             public void accept(Throwable throwable) throws Exception {
                                 if (callback != null) {
-                                    callback.onError(RenovaceCode.CODE_ERR_IO, throwable);
+                                    callback.onError(RenovaceCode.CODE_ERR_IO, new RenovaceException(RenovaceCode.CODE_ERR_IO, throwable.getMessage()));
                                 }
                             }
                         });
