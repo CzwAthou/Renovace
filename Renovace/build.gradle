@@ -37,11 +37,10 @@ dependencies {
     api depend.rxjava2()
     api depend.rxandroid2()
 
-    implementation depend.retrofit()
-    implementation depend.retrofit_gson()
-    implementation depend.retrofit_rxjava_adapter2()
+    api depend.retrofit()
+    api depend.retrofit_gson()
+    api depend.retrofit_rxjava_adapter2()
 
     api depend.okhttp()
-    implementation depend.okhttp_log()
-
+    api depend.okhttp_log()
 }
