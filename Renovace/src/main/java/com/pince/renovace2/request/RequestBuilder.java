@@ -215,6 +215,10 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
         return requestBody().map(new RenovaceFunc<R>(rspClass, mStructType));
     }
 
+    public <R> Observable<R> request(Type rspType) {
+        return requestBody().map(new RenovaceFunc<R>(rspType, mStructType));
+    }
+
     public <R> Observable<R> request(Class<? extends RenovaceBean> rawCls, Class<R> resultCls) {
         return requestBody().map(new RenovaceFunc<R>(Utils.newParameterizedTypeWithOwner(rawCls, resultCls), StructType.Result));
     }
