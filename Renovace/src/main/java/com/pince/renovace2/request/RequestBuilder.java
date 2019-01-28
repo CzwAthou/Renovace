@@ -44,8 +44,8 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
     private Map<String, Object> mHeaders;
     private Map<String, Object> mParams;
     private Method mMethod;
-    private StructType mStructType = StructType.Result;
-    private int mRetryCount = 0;
+    protected StructType mStructType = StructType.Result;
+    protected int mRetryCount = 0;
     private Class<? extends Config> mConfigCls;
 
     private LifecycleOwner lifecycleOwner = null;
