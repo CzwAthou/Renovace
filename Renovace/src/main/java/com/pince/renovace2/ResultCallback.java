@@ -1,7 +1,10 @@
 package com.pince.renovace2;
 
+import android.arch.lifecycle.LifecycleOwner;
+
 import com.pince.renovace2.Util.Utils;
 
+import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 
 /**
@@ -10,6 +13,15 @@ import java.lang.reflect.Type;
  */
 
 public abstract class ResultCallback<T> {
+
+    private WeakReference<LifecycleOwner> lifecycleOwner;
+
+    public ResultCallback() {
+    }
+
+    public ResultCallback(WeakReference<LifecycleOwner> lifecycleOwner) {
+        this.lifecycleOwner = lifecycleOwner;
+    }
 
     public void onStart() {
     }
@@ -21,5 +33,12 @@ public abstract class ResultCallback<T> {
 
     public Type getType(StructType structType) {
         return Utils.findNeedType(getClass());
+    }
+
+    public LifecycleOwner getLifecycleOwner() {
+        if (lifecycleOwner != null) {
+            return lifecycleOwner.get();
+        }
+        return null;
     }
 }

@@ -226,6 +226,8 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
     public <R> Disposable request(final ResultCallback<R> callback) {
         Type type = null;
         if (callback != null) {
+            bindLifecycle(callback.getLifecycleOwner());
+
             type = callback.getType(mStructType);
             if (type == null) {
                 type = ResponseBody.class;
