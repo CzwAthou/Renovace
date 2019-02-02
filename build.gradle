@@ -10,7 +10,7 @@ buildscript {
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-        classpath 'com.pince.plugin:gradle-depend:1.0.4'
+        classpath 'com.pince.plugin:gradle-depend:1.1.2'
         classpath 'com.pince.plugin:upaar:1.0.4'
     }
 }

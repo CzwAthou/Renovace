@@ -4,7 +4,6 @@ import android.text.TextUtils;
 
 import com.pince.renovace2.Renovace;
 import com.pince.renovace2.cache.HttpCache;
-import com.pince.renovace2.interceptor.CacheInterceptor;
 import com.pince.renovace2.interceptor.LogInterceptor;
 import com.pince.renovace2.interceptor.MainInterceptor;
 
@@ -15,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import okhttp3.Call;
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
+import okhttp3.internal.cache.CacheInterceptor;
 import retrofit2.CallAdapter;
 import retrofit2.Converter;
 import retrofit2.Retrofit;
@@ -66,7 +66,6 @@ public abstract class BaseConfig implements Config {
         okHttpClientBuilder.addInterceptor(new MainInterceptor());
         okHttpClientBuilder.addNetworkInterceptor(new LogInterceptor());
         client(okHttpClientBuilder);
-        okHttpClientBuilder.addInterceptor(new CacheInterceptor(Renovace.getContext()));
         okHttpClientBuilder.cache(HttpCache.getCache(Renovace.getContext().getExternalCacheDir() + "/http-cache"));
         okHttpClientBuilder.retryOnConnectionFailure(true);
         okHttpClientBuilder.connectTimeout(5000, TimeUnit.MILLISECONDS);
