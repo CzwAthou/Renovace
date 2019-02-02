@@ -21,6 +21,7 @@ allprojects {
     repositories {
         google()
         jcenter()
+        mavenCentral()
         maven { url "https://jitpack.io" }
         maven { url "http://nexus.handouzb.com/nexus/content/groups/public/" }
     }

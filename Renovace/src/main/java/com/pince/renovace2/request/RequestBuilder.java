@@ -26,6 +26,7 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.ObservableTransformer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.CheckReturnValue;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
@@ -234,7 +235,9 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
             type = ResponseBody.class;
             mStructType = StructType.Direct;
         }
-        return requestBody().map(new RenovaceFunc<R>(type, mStructType)).observeOn(AndroidSchedulers.mainThread())
+        return requestBody()
+                .map(new RenovaceFunc<R>(type, mStructType))
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
                         new Consumer<Object>() {
                             @Override
