@@ -19,8 +19,8 @@ public abstract class ResultCallback<T> {
     public ResultCallback() {
     }
 
-    public ResultCallback(WeakReference<LifecycleOwner> lifecycleOwner) {
-        this.lifecycleOwner = lifecycleOwner;
+    public ResultCallback(LifecycleOwner lifecycleOwner) {
+        this.lifecycleOwner = new WeakReference<LifecycleOwner>(lifecycleOwner);
     }
 
     public void onStart() {
