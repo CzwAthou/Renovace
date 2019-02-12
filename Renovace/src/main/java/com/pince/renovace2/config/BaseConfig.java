@@ -41,6 +41,17 @@ public abstract class BaseConfig implements Config {
         addCallAdapterFactory(builder);
     }
 
+    @Override
+    public void reset(Retrofit.Builder builder) {
+        if (!TextUtils.isEmpty(getBaseUrl())) {
+            builder.baseUrl(getBaseUrl());
+        } else if (getBaseHttpUrl() != null) {
+            builder.baseUrl(getBaseHttpUrl());
+        } else {
+            throw new RuntimeException("you mast override method getBaseUrl or getBaseHttpUrl");
+        }
+    }
+
     private void addCallAdapterFactory(Retrofit.Builder builder) {
         List<CallAdapter.Factory> factories = getCallAdapterFactories();
         if (factories != null) {

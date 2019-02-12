@@ -34,12 +34,20 @@ public class Renovace {
         init(context, null, debug);
     }
 
-    public static void init(@NonNull Context context, Class<? extends Config> defaultConfig, boolean debug) {
+    public static void init(@NonNull Context context, Class<? extends Config> clientConfig, boolean debug) {
         mContext = context.getApplicationContext();
         respCodeinteceptorList = new CopyOnWriteArrayList<>();
-        setDefaultConfig(defaultConfig);
+        setDefaultConfig(clientConfig);
         RenovaceLogUtil.DEBUG = debug;
         RxJavaPlugins.setErrorHandler(new RenovaceErrorHandler());
+    }
+
+    /**
+     * reset config, maybe you want change the retrofit with the config
+     * @param clientConfig
+     */
+    public static void resetConfig(Class<? extends Config> clientConfig) {
+        Api.resetConfig(clientConfig);
     }
 
     public static Context getContext() {

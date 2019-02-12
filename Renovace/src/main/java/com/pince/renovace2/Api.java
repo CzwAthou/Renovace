@@ -1,5 +1,6 @@
 package com.pince.renovace2;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
@@ -48,11 +49,43 @@ class Api {
         return apiProxy;
     }
 
+    static void resetConfig(Class<? extends Config> clientConfig) {
+        if (clientConfig == null) {
+            throw new IllegalArgumentException("config can't be null");
+        }
+        String clientName = clientConfig.getCanonicalName();
+        if (TextUtils.isEmpty(clientName)) {
+            throw new IllegalArgumentException("class must be a Config");
+        }
+        ApiProxy apiProxy = apiProxies.get(clientName);
+        if (apiProxy != null) {
+            apiProxy.retrofit = resetRetrofit(apiProxy.retrofit, clientConfig);
+        } else {
+            apiProxy = new ApiProxy(newRetrofit(clientConfig));
+            apiProxies.put(clientName, apiProxy);
+        }
+    }
+
     private static Retrofit newRetrofit(Class<? extends Config> configClass) {
         Retrofit.Builder builder = new Retrofit.Builder();
         try {
             Config config = configClass.newInstance();
             config.build(builder);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return builder.build();
+    }
+
+    private static Retrofit resetRetrofit(@NonNull Retrofit oldRetrofit, Class<? extends Config> configClass) {
+        Retrofit.Builder builder = oldRetrofit.newBuilder();
+        try {
+            Config config = configClass.newInstance();
+            config.reset(builder);
         } catch (InstantiationException e) {
             e.printStackTrace();
         } catch (IllegalAccessException e) {

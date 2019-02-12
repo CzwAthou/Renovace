@@ -12,5 +12,7 @@ public interface Config {
 
     void build(Retrofit.Builder builder);
 
+    void reset(Retrofit.Builder builder);
+
     OkHttpClient client();
 }

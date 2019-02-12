@@ -16,6 +16,7 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import okhttp3.OkHttpClient;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -175,6 +176,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected String getBaseUrl() {
             return "http://api.diaoyu-3.com/";
+        }
+
+        @Override
+        public void reset(Retrofit.Builder builder) {
+
         }
     }
 }
