@@ -23,6 +23,7 @@ public class RenovaceLogInterceptor implements Interceptor {
                 RenovaceLogUtil.logD(message);
             }
         });
+        httpLoggingInterceptor.setLevel(RenovaceLogUtil.DEBUG ? HttpLoggingInterceptor.Level.BODY : HttpLoggingInterceptor.Level.NONE);
     }
 
     @Override
