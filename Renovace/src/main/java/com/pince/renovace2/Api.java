@@ -59,6 +59,7 @@ class Api {
         }
         ApiProxy apiProxy = apiProxies.get(clientName);
         if (apiProxy != null) {
+            apiProxy.apiCache.clear();
             apiProxy.retrofit = resetRetrofit(apiProxy.retrofit, clientConfig);
         } else {
             apiProxy = new ApiProxy(newRetrofit(clientConfig));
@@ -102,7 +103,7 @@ class Api {
         private Retrofit retrofit;
 
         ApiProxy(Retrofit retrofit) {
-            apiCache = new HashMap<>();
+            this.apiCache = new HashMap<>();
             this.retrofit = retrofit;
         }
 
