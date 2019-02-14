@@ -31,7 +31,7 @@ public class Utils {
     public static <R> Type findNeedType(Class<R> cls) {
         List<Type> typeList = getMethodTypes(cls);
         if (typeList == null || typeList.isEmpty()) {
-            return RequestBody.class;
+            return null;
         }
         return typeList.get(0);
     }

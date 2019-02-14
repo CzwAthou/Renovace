@@ -7,6 +7,8 @@ import com.pince.renovace2.Util.Utils;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Type;
 
+import okhttp3.ResponseBody;
+
 /**
  * @author cc
  * @date 2017/11/3
@@ -32,7 +34,11 @@ public abstract class ResultCallback<T> {
     }
 
     public Type getType(StructType structType) {
-        return Utils.findNeedType(getClass());
+        Type type = Utils.findNeedType(getClass());
+        if (type == null) {
+            type = ResponseBody.class;
+        }
+        return type;
     }
 
     public LifecycleOwner getLifecycleOwner() {
