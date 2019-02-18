@@ -77,10 +77,14 @@ public abstract class BaseConfig implements Config {
         okHttpClientBuilder.addNetworkInterceptor(new RenovaceLogInterceptor());
         client(okHttpClientBuilder);
         okHttpClientBuilder.addInterceptor(new CacheInterceptor());
-        okHttpClientBuilder.cache(HttpCache.getCache(Renovace.getContext().getExternalCacheDir() + "/http-cache"));
+        okHttpClientBuilder.cache(HttpCache.getCache(cachePath()));
         okHttpClientBuilder.retryOnConnectionFailure(true);
         okHttpClientBuilder.connectTimeout(5000, TimeUnit.MILLISECONDS);
         return okHttpClientBuilder.build();
+    }
+
+    protected String cachePath() {
+        return Renovace.getContext().getExternalCacheDir() + "/http-cache";
     }
 
     /**
