@@ -113,7 +113,12 @@ public class RenovaceFunc<T> implements Function<ResponseBody, T> {
                     }
                     throw new RenovaceException(bean.getCode(), bean.getMessage());
                 }
-                return (T) bean.getData();
+                T result = bean.getData();
+                if (result != null) {
+                    return result;
+                } else {
+                    return (T) new Object();
+                }
             case Bean:
                 if (!bean.isSuccess()) {
                     if (inteceptorResp(bean.getCode(), bean.getExtra())) {
