@@ -10,12 +10,16 @@ import com.pince.renovace2.Renovace;
 import com.pince.renovace2.config.BaseConfig;
 import com.pince.renovace2.request.download.DownloadListener;
 import com.pince.renovace2.request.download.DownloadRequest;
+import com.pince.renovace2.request.upload.UploadListener;
+import com.pince.renovace2.request.upload.UploadRequest;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import okhttp3.Response;
 import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
@@ -27,6 +31,32 @@ public class MainActivity extends AppCompatActivity {
 
         Renovace.init(getApplicationContext(), true);
         Renovace.setDefaultConfig(DefaultConfig.class);
+
+        new UploadRequest("", "", "")
+                .client(Renovace.getClient(DefaultConfig.class))
+                .mediaType(MediaType.parse(""))
+                .withParams("", "")
+                .uploadAsync(new UploadListener() {
+                    @Override
+                    public void onStart() {
+
+                    }
+
+                    @Override
+                    public void onProgress(long currentLength, long total, boolean done) {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onSuccess(Response response) {
+
+                    }
+                });
     }
 
     public void onClickSync(View view) {
