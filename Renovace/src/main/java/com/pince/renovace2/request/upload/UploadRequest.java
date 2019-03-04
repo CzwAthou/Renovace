@@ -185,7 +185,7 @@ public class UploadRequest {
             String value = entry.getValue();
             builder.addFormDataPart(key, value);
         }
-        if (file.exists() && TextUtils.isEmpty(buket)) {
+        if (file.exists() && !TextUtils.isEmpty(buket)) {
             builder.addFormDataPart(buket, file.getName(), RequestBody.create(mediaType, file));
         }
         RequestBody requestBody = builder.build();
