@@ -55,6 +55,7 @@ public class UploadRequest {
 
         public FileInput(File file, String buket, MediaType mediaType) {
             this.file = file;
+            this.buket = buket;
             this.mediaType = mediaType;
         }
     }
@@ -162,10 +163,12 @@ public class UploadRequest {
         //构造上传请求，类似web表单
         MultipartBody.Builder builder = new MultipartBody.Builder();
         builder.setType(MultipartBody.FORM);
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            builder.addFormDataPart(key, value);
+        if (params != null) {
+            for (Map.Entry<String, String> entry : params.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+                builder.addFormDataPart(key, value);
+            }
         }
         if (fileInputs != null) {
             for (FileInput fileInput : fileInputs) {
