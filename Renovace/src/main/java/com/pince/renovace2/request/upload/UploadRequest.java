@@ -4,10 +4,15 @@ import android.support.annotation.WorkerThread;
 import android.text.TextUtils;
 import android.util.Pair;
 
+import com.pince.renovace2.Renovace;
+import com.pince.renovace2.config.Config;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
@@ -29,48 +34,52 @@ import okhttp3.Response;
  */
 public class UploadRequest {
 
-    private final String url;
-    private String filePath;
-    private String buket;
-    private File file;
-    private MediaType mediaType = MediaType.parse("multipart/form-data");
+    private String url;
     private Map<String, String> params;
-
-    public UploadRequest(String url, String filePath, String buket) {
-        this.url = url;
-        this.filePath = filePath;
-        this.buket = buket;
-    }
-
-    public UploadRequest(String url, File file, String buket) {
-        this.url = url;
-        this.file = file;
-        this.buket = buket;
-    }
+    private Set<FileInput> fileInputs;
 
     private OkHttpClient client;
     private UploadListener uploadListener;
 
-    public UploadRequest client(OkHttpClient client) {
-        this.client = client;
-        client.newBuilder()
-                .addInterceptor(new Interceptor() {
-                    @Override
-                    public Response intercept(Chain chain) throws IOException {
-                        Request original = chain.request();
-                        Request request = original.newBuilder()
-                                .method(original.method(), new ProgressRequestBody(original.body(), uploadListenerProxy))
-                                .build();
-                        return chain.proceed(request);
-                    }
-                })
-                .connectTimeout(5000, TimeUnit.MILLISECONDS)
-                .build();
-        return this;
+    public static class FileInput {
+        String filePath;
+        File file;
+        MediaType mediaType = MediaType.parse("multipart/form-data");
+        String buket;
+
+        public FileInput(String filePath, String buket, MediaType mediaType) {
+            this.filePath = filePath;
+            this.buket = buket;
+            this.mediaType = mediaType;
+        }
+
+        public FileInput(File file, String buket, MediaType mediaType) {
+            this.file = file;
+            this.mediaType = mediaType;
+        }
     }
 
-    public UploadRequest mediaType(MediaType mediaType) {
-        this.mediaType = mediaType;
+    public UploadRequest(Class<? extends Config> configClass) {
+        this.client = Renovace.getClient(configClass);
+        if (client != null) {
+            client.newBuilder()
+                    .addInterceptor(new Interceptor() {
+                        @Override
+                        public Response intercept(Chain chain) throws IOException {
+                            Request original = chain.request();
+                            Request request = original.newBuilder()
+                                    .method(original.method(), new ProgressRequestBody(original.body(), uploadListenerProxy))
+                                    .build();
+                            return chain.proceed(request);
+                        }
+                    })
+                    .connectTimeout(5000, TimeUnit.MILLISECONDS)
+                    .build();
+        }
+    }
+
+    public UploadRequest url(String url) {
+        this.url = url;
         return this;
     }
 
@@ -79,6 +88,14 @@ public class UploadRequest {
             params = new HashMap<>();
         }
         params.put(key, value);
+        return this;
+    }
+
+    public UploadRequest addFile(FileInput fileInput) {
+        if (fileInputs == null) {
+            fileInputs = new HashSet<>();
+        }
+        fileInputs.add(fileInput);
         return this;
     }
 
@@ -141,13 +158,7 @@ public class UploadRequest {
                 .build();
     }
 
-    @WorkerThread
-    public Response uploadSync(UploadListener uploadListener) throws IOException {
-        if (file == null) {
-            file = new File(filePath);
-        }
-        this.uploadListener = uploadListener;
-
+    private okhttp3.Call createCall() {
         //构造上传请求，类似web表单
         MultipartBody.Builder builder = new MultipartBody.Builder();
         builder.setType(MultipartBody.FORM);
@@ -156,49 +167,42 @@ public class UploadRequest {
             String value = entry.getValue();
             builder.addFormDataPart(key, value);
         }
-        if (file.exists() && TextUtils.isEmpty(buket)) {
-            builder.addFormDataPart(buket, file.getName(), RequestBody.create(mediaType, file));
+        if (fileInputs != null) {
+            for (FileInput fileInput : fileInputs) {
+                File file = null;
+                if (fileInput.file != null) {
+                    file = fileInput.file;
+                } else if (!TextUtils.isEmpty(fileInput.filePath)) {
+                    file = new File(fileInput.filePath);
+                }
+                if (file != null && file.exists() && !TextUtils.isEmpty(fileInput.buket)) {
+                    builder.addFormDataPart(fileInput.buket, file.getName(), RequestBody.create(fileInput.mediaType, file));
+                }
+            }
         }
         RequestBody requestBody = builder.build();
         Request.Builder requestBuilder = new Request.Builder()
                 .url(url)
                 .post(requestBody);
-        okhttp3.Call call = getClient()
+        return getClient()
                 .newCall(requestBuilder.build());
+    }
+
+    @WorkerThread
+    public Response uploadSync(UploadListener uploadListener) throws IOException {
+        this.uploadListener = uploadListener;
         if (uploadListenerProxy != null) {
             uploadListenerProxy.onStart();
         }
-        return call.execute();
+        return createCall().execute();
     }
 
     public void uploadAsync(UploadListener uploadListener) {
-        if (file == null) {
-            file = new File(filePath);
-        }
         this.uploadListener = uploadListener;
-
-        //构造上传请求，类似web表单
-        MultipartBody.Builder builder = new MultipartBody.Builder();
-        builder.setType(MultipartBody.FORM);
-        for (Map.Entry<String, String> entry : params.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            builder.addFormDataPart(key, value);
-        }
-        if (file.exists() && !TextUtils.isEmpty(buket)) {
-            builder.addFormDataPart(buket, file.getName(), RequestBody.create(mediaType, file));
-        }
-        RequestBody requestBody = builder.build();
-        Request.Builder requestBuilder = new Request.Builder()
-                .url(url)
-                .post(requestBody);
-
-        okhttp3.Call call = getClient()
-                .newCall(requestBuilder.build());
         if (uploadListenerProxy != null) {
             uploadListenerProxy.onStart();
         }
-        call.enqueue(new Callback() {
+        createCall().enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
                 if (uploadListenerProxy != null) {
