@@ -265,7 +265,11 @@ public abstract class RequestBuilder<B extends RequestBuilder> implements Lifecy
                             @Override
                             public void accept(Throwable throwable) throws Exception {
                                 if (callback != null) {
-                                    callback.onError(RenovaceCode.CODE_ERR_IO, new RenovaceException(RenovaceCode.CODE_ERR_IO, throwable.getMessage()));
+                                    if (throwable instanceof RenovaceException) {
+                                        callback.onError(((RenovaceException) throwable).getCode(), throwable);
+                                    } else {
+                                        callback.onError(RenovaceCode.CODE_ERR_IO, new RenovaceException(RenovaceCode.CODE_ERR_IO, throwable.getMessage()));
+                                    }
                                 }
                             }
                         });
