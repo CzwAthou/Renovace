@@ -6,20 +6,15 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 
-import com.pince.renovace2.Renovace;
-import com.pince.renovace2.config.BaseConfig;
-import com.pince.renovace2.request.download.DownloadListener;
-import com.pince.renovace2.request.download.DownloadRequest;
-import com.pince.renovace2.request.upload.UploadListener;
-import com.pince.renovace2.request.upload.UploadRequest;
+import com.renovace.common.download.DownloadListener;
+import com.renovace.common.download.DownloadRequest;
+import com.renovace.config.BaseConfig;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
-import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
-import okhttp3.Response;
 import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity {
@@ -28,35 +23,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        Renovace.init(getApplicationContext(), true);
-        Renovace.setDefaultConfig(DefaultConfig.class);
-
-        new UploadRequest("", "", "")
-                .client(Renovace.getClient(DefaultConfig.class))
-                .mediaType(MediaType.parse(""))
-                .withParams("", "")
-                .uploadAsync(new UploadListener() {
-                    @Override
-                    public void onStart() {
-
-                    }
-
-                    @Override
-                    public void onProgress(long currentLength, long total, boolean done) {
-
-                    }
-
-                    @Override
-                    public void onError(Throwable throwable) {
-
-                    }
-
-                    @Override
-                    public void onSuccess(Response response) {
-
-                    }
-                });
     }
 
     public void onClickSync(View view) {
@@ -109,7 +75,7 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 super.run();
                 new DownloadRequest("http://dldir1.qq.com/foxmail/qqmail_android_5.5.5.10133788.2392_0.apk")
-                        .savePath(getExternalCacheDir() + "download/test/test.apk")
+                        .savePath(getExternalCacheDir().getAbsolutePath() + "/download/test/test.apk")
                         .downSync(new DownloadListener() {
                             @Override
                             public void onStart() {
@@ -120,11 +86,6 @@ public class MainActivity extends AppCompatActivity {
                             public void onProgress(long currentLength, long total, boolean done) {
                                 Log.e("download", String.format("hasDown:%d  total:%d  done:%s  thread:%s", currentLength, total, String.valueOf(done), Thread.currentThread().getName()));
                             }
-
-//                            @Override
-//                            public void onComplete(File file) {
-//                                Log.e("download", "down complete:" + file.getAbsolutePath());
-//                            }
 
                             @Override
                             public void onError(Throwable throwable) {
@@ -148,11 +109,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onProgress(long currentLength, long total, boolean done) {
                         Log.e("download", String.format("hasDown:%d  total:%d  done：%s  thread:%s", currentLength, total, String.valueOf(done), Thread.currentThread().getName()));
                     }
-
-//                    @Override
-//                    public void onComplete(File file) {
-//                        Log.e("download", "down complete:" + file.getAbsolutePath());
-//                    }
 
                     @Override
                     public void onError(Throwable throwable) {

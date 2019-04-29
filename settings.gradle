@@ -1,2 +1,3 @@
 include ':app'
-include ':Renovace'
+include ':renovace'
+include ':renovace_common'

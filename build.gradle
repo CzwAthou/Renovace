@@ -3,27 +3,21 @@ buildscript {
     repositories {
         google()
         jcenter()
-        maven { url 'http://nexus.handouzb.com/nexus/content/groups/public/' }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.1.4'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
-        classpath 'com.pince.plugin:gradle-depend:1.1.2'
-        classpath 'com.pince.plugin:upaar:1.0.4'
     }
 }
 
 allprojects {
-    apply plugin:'com.pince.depend'
-
     repositories {
         google()
         jcenter()
         mavenCentral()
         maven { url "https://jitpack.io" }
-        maven { url "http://nexus.handouzb.com/nexus/content/groups/public/" }
     }
 }
 
